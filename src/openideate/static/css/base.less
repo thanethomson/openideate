@@ -1,0 +1,336 @@
+@import "reset.css";
+@import "defs.less";
+
+
+html, body {
+    height: 100%;
+}
+
+body {
+    font-family: Helvetica, FreeSans, Arial, Tahoma, Verdana, Sans;
+    font-size: 15px;
+    color: @background-red;
+    background-color: @background-colour;
+    letter-spacing: -0.2px;
+    //background-position: 495px 0px;
+    //background-repeat: repeat-y;
+}
+
+.chunkFont {
+    font-family: 'Chunkfive', Helvetica, Arial, sans;
+    font-size: 18px;
+    font-weight: normal;
+    letter-spacing: 0.01em;
+    color: @menu-text-colour;
+    line-height: 24px;
+}
+
+#mainContainer {
+    .fullWidth;
+    min-width: 1024px;
+}
+
+#headerContainer, #header {
+    .fullWidth;
+    height: @header-height;
+    background-color: @header-colour;
+}
+#header  {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+}   
+    #header a {
+        .chunkFont;
+        color: @header-link-colour;
+        text-decoration: none;
+    }
+        #header a:hover {
+            color: @header-link-hover-colour;
+            //text-shadow: 0px 0px 1px #888;
+        }
+    
+    #header #floatLeftContainer {
+        float: left;
+        width: 49%;
+    }
+        #header #floatLeftContainer div {
+            float: left;
+        }
+        #header #floatLeftContainer #search {
+            width: 290px;
+            padding-top: 31px;
+        }
+            #header #floatLeftContainer #search input {
+                padding: 5px;
+                border: 2px solid #ccc;
+                width: @search-width;
+                color: #bbb;
+                vertical-align: top;
+                margin-right: 5px;
+                -moz-border-radius: 15px;
+                border-radius: 15px;
+            }
+            #header #floatLeftContainer #search #searchLinkContainer {
+                padding-top: 2px;
+                float: right;
+            }
+                
+        #header #floatLeftContainer #logo {
+            width: 250px;
+            height: @header-height;
+            padding-left: 44px;
+            padding-top: 34px;
+        }
+            #header #floatLeftContainer #logo a {
+                font-size: 40px;
+            }
+                #header #floatLeftContainer #logo a .dark {
+                    color: @header-link-colour;
+                }
+                #header #floatLeftContainer #logo a .light {
+                    color: @header-link-hover-colour;
+                }
+
+    #header #floatRightContainer {
+        float: right;
+        width: 49%;
+    }
+        #header #floatRightContainer div {
+            width: 160px;
+            float: right;
+            vertical-align: top;
+            padding-top: 30px;
+        }
+            #header #floatRightContainer div a {
+                vertical-align: top;
+                padding-right: 5px;
+            }
+        #header #floatRightContainer #logout img {
+            position: relative;
+            top: -5px;
+        }
+        #header #floatRightContainer #messages img {
+            position: relative;
+            top: -3px;
+        }
+
+#menuContainer, #menu {
+    width: 100%;
+    height: @menu-height;
+}
+#menu {
+    background-color: @menu-colour;
+    position: fixed;
+    top: @header-height;
+    left: 0px;
+    //border-bottom: 8px solid @header-link-hover-colour;
+}
+    #menu #menuLeft {
+        .chunkFont;
+        width: 227px;
+        height: @menu-height;
+        float: left;
+        padding-top: @menu-top-offset;
+        text-align: right;
+        padding-right: 25px;
+    }
+    #menu a {
+        .chunkFont;
+        color: @menu-link-colour;
+        text-decoration: none;
+    }
+        #menu a:hover {
+            color: @menu-link-colour-hover;
+            text-shadow: 0px 0px 1px #fff;
+        }
+    #menu a.active {
+        .chunkFont;
+        color: @menu-link-active-colour;
+    }
+        #menu a.active:hover {
+            color: @menu-link-active-colour-hover;
+        }
+    #menu #menuRight {
+        .chunkFont;
+        width: 650px;
+        height: @menu-height;
+        float: left;
+    }
+        .halfMenu {
+            height: (@menu-height/2) - @menu-top-offset;
+        }
+        #menu #menuRight #menuRightTop {
+            .halfMenu;
+            margin-top: @menu-top-offset;
+        }
+        #menu #menuRight #menuRightBottom {
+            .halfMenu;
+        }
+
+            .menuButton {
+                background-repeat: no-repeat;
+                height: @menu-button-height;
+                float: left;
+            }
+            // TOP MENU
+            #menu #menuRight #menuRightTop #following {
+                .menuButton;
+                background-position: -227px -21px;
+                width: 231px;
+            }
+                #menu #menuRight #menuRightTop #following:hover,
+                #menu #menuRight #menuRightTop #following.active {
+                    background-position: -227px -116px;
+                }
+            #menu #menuRight #menuRightTop #followers {
+                .menuButton;
+                background-position: -458px -21px;
+                width: 133px;
+            }
+                #menu #menuRight #menuRightTop #followers:hover,
+                #menu #menuRight #menuRightTop #followers.active {
+                    background-position: -458px -116px;
+                }
+            #menu #menuRight #menuRightTop #everyone {
+                .menuButton;
+                background-position: -591px -21px;
+                width: 98px;
+            }
+                #menu #menuRight #menuRightTop #everyone:hover,
+                #menu #menuRight #menuRightTop #everyone.active {
+                    background-position: -591px -116px;
+                }
+            #menu #menuRight #menuRightTop #myself {
+                .menuButton;
+                background-position: -689px -21px;
+                width: 87px;
+            }
+                #menu #menuRight #menuRightTop #myself:hover,
+                #menu #menuRight #menuRightTop #myself.active {
+                    background-position: -689px -116px;
+                }
+
+            // BOTTOM MENU
+            #menu #menuRight #menuRightBottom #activity {
+                .menuButton;
+                background-position: -227px -47px;
+                width: 70px;
+            }
+                #menu #menuRight #menuRightBottom #activity:hover,
+                #menu #menuRight #menuRightBottom #activity.active {
+                    background-position: -227px -142px;
+                }
+            #menu #menuRight #menuRightBottom #ideas {
+                .menuButton;
+                background-position: -297px -47px;
+                width: 68px;
+            }
+                #menu #menuRight #menuRightBottom #ideas:hover,
+                #menu #menuRight #menuRightBottom #ideas.active {
+                    background-position: -297px -142px;
+                }
+            #menu #menuRight #menuRightBottom #profiles {
+                .menuButton;
+                background-position: -365px -47px;
+                width: 93px;
+            }
+                #menu #menuRight #menuRightBottom #profiles:hover,
+                #menu #menuRight #menuRightBottom #profiles.active {
+                    background-position: -365px -142px;
+                }
+
+
+#body #bodyLeft {
+    float: left;
+    //min-width: @body-block-width;
+    //width: @body-block-width;
+    padding-top: 10px;
+    padding-bottom: 50px;
+    padding-left: 45px;
+}
+#body #bodyRight {
+    float: left;
+    //min-width: @body-block-width;
+    padding-top: 10px;
+    padding-left: 45px;
+    padding-bottom: 50px;
+}
+#body h1 {
+    font-family: 'Chunkfive', Helvetica, Arial, sans;
+    font-weight: normal;
+    font-size: 20px;
+    width: auto;
+    margin-bottom: 20px;
+    color: @list-heading-colour;
+    float: left;
+    //background-color: @list-item-background-colour;
+    clear: both;
+    //text-shadow: 0px 0px 1px @list-heading-shadow-colour;
+    //padding: 10px;
+}
+
+.listItem {
+    //background-color: @list-item-background-colour;
+    //margin-bottom: 20px;
+    clear: both;
+    width: @list-item-width;
+    //-moz-border-radius: 15px;
+    //border-radius: 15px;
+}
+    .listItem td {
+        vertical-align: top;
+        padding: @list-item-padding @list-item-padding @list-item-padding 0px;
+    }
+    .listItem .avatar {
+        //margin-left: @list-item-padding;
+        width: @list-item-avatar-dim;
+        height: @list-item-avatar-dim;
+        background-color: @link-colour;
+        -moz-border-radius: 8px;
+        border-radius: 8px;
+    }
+    .listItem .listItemText {
+        font-family: Helvetica, FreeSans, Arial, Tahoma, Sans;
+        font-size: 15px;
+        color: @list-item-text-colour;
+    }
+        .listItem .listItemText a {
+            color: @link-colour;
+            font-weight: bold;
+            text-decoration: none;
+        }
+            .listItem .listItemText a:hover {
+                color: @link-hover-colour;
+                //text-decoration: underline;
+            }
+    .listItem .listItemStatus {
+        padding-top: 5px;
+        color: @list-item-status-colour;
+    }
+
+
+.viewMoreButton {
+    .chunkFont;
+    clear: both;
+    color: @view-more-button-text-colour;
+    //border: 2px solid @view-more-button-bg-colour;
+    background-color: @list-heading-colour;
+    //-moz-border-radius: 20px;
+    //border-radius: 20px;
+    font-weight: bold;
+    font-size: 100%;
+    //padding: 8px 8px 8px @list-item-avatar-dim+@list-item-padding;
+    padding: 8px;
+    //margin-left: (@list-item-padding*2)+@list-item-avatar-dim;
+    margin-top: 20px;
+    text-align: center;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+}
+    .viewMoreButton a {
+        color: #fff;
+        text-decoration: none;
+        font-weight: normal;
+    }
+

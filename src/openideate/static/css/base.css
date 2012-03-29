@@ -1,0 +1,261 @@
+@import "reset.css";
+.fullWidth {
+  width: 100%;
+}
+html, body {
+  height: 100%;
+}
+body {
+  font-family: Helvetica, FreeSans, Arial, Tahoma, Verdana, Sans;
+  font-size: 15px;
+  color: #361f00;
+  background-color: #b9cfdb;
+  letter-spacing: -0.2px;
+}
+#mainContainer {
+  width: 100%;
+  min-width: 1024px;
+}
+#headerContainer, #header {
+  width: 100%;
+  height: 89px;
+  background-color: #361f00;
+}
+#header {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+}
+#header a {
+  color: #ffffff;
+  font-weight: bold;
+  text-decoration: none;
+}
+#header a:hover {
+  text-decoration: underline;
+}
+#header #floatLeftContainer {
+  float: left;
+  width: 49%;
+}
+#header #floatLeftContainer div {
+  float: left;
+}
+#header #floatLeftContainer #search {
+  width: 270px;
+  padding-top: 28px;
+}
+#header #floatLeftContainer #search input {
+  padding: 5px;
+  border: 2px solid #ccc;
+  width: 200px;
+  color: #bbb;
+  vertical-align: top;
+  margin-right: 5px;
+  -moz-border-radius: 15px;
+  border-radius: 15px;
+}
+#header #floatLeftContainer #logo {
+  width: 221px;
+  height: 89px;
+}
+#header #floatLeftContainer #logo img {
+  margin-top: 29px;
+  margin-left: 44px;
+}
+#header #floatRightContainer {
+  float: right;
+  width: 49%;
+}
+#header #floatRightContainer div {
+  width: 160px;
+  float: right;
+  vertical-align: top;
+  padding-top: 30px;
+}
+#header #floatRightContainer div a {
+  vertical-align: top;
+  padding-right: 5px;
+}
+#header #floatRightContainer #logout img {
+  position: relative;
+  top: -5px;
+}
+#header #floatRightContainer #messages img {
+  position: relative;
+  top: -3px;
+}
+#menuContainer, #menu {
+  background-color: #ffffff;
+  width: 100%;
+  height: 95px;
+}
+#menu {
+  position: fixed;
+  top: 89px;
+  left: 0px;
+  border-bottom: 8px solid #b9cfdb;
+}
+#menu #menuLeft {
+  width: 227px;
+  height: 95px;
+  float: left;
+}
+#menu #menuRight {
+  width: 560px;
+  height: 95px;
+  float: left;
+}
+.halfMenu {
+  height: 25.5px;
+}
+#menu #menuRight #menuRightTop {
+  height: 25.5px;
+  margin-top: 22px;
+}
+#menu #menuRight #menuRightBottom {
+  height: 25.5px;
+}
+.menuButton {
+  background-repeat: no-repeat;
+  height: 26px;
+  float: left;
+}
+#menu #menuRight #menuRightTop #following {
+  background-repeat: no-repeat;
+  height: 26px;
+  float: left;
+  background-position: -227px -21px;
+  width: 231px;
+}
+#menu #menuRight #menuRightTop #following:hover, #menu #menuRight #menuRightTop #following.active {
+  background-position: -227px -116px;
+}
+#menu #menuRight #menuRightTop #followers {
+  background-repeat: no-repeat;
+  height: 26px;
+  float: left;
+  background-position: -458px -21px;
+  width: 133px;
+}
+#menu #menuRight #menuRightTop #followers:hover, #menu #menuRight #menuRightTop #followers.active {
+  background-position: -458px -116px;
+}
+#menu #menuRight #menuRightTop #everyone {
+  background-repeat: no-repeat;
+  height: 26px;
+  float: left;
+  background-position: -591px -21px;
+  width: 98px;
+}
+#menu #menuRight #menuRightTop #everyone:hover, #menu #menuRight #menuRightTop #everyone.active {
+  background-position: -591px -116px;
+}
+#menu #menuRight #menuRightTop #myself {
+  background-repeat: no-repeat;
+  height: 26px;
+  float: left;
+  background-position: -689px -21px;
+  width: 87px;
+}
+#menu #menuRight #menuRightTop #myself:hover, #menu #menuRight #menuRightTop #myself.active {
+  background-position: -689px -116px;
+}
+#menu #menuRight #menuRightBottom #activity {
+  background-repeat: no-repeat;
+  height: 26px;
+  float: left;
+  background-position: -227px -47px;
+  width: 70px;
+}
+#menu #menuRight #menuRightBottom #activity:hover, #menu #menuRight #menuRightBottom #activity.active {
+  background-position: -227px -142px;
+}
+#menu #menuRight #menuRightBottom #ideas {
+  background-repeat: no-repeat;
+  height: 26px;
+  float: left;
+  background-position: -297px -47px;
+  width: 68px;
+}
+#menu #menuRight #menuRightBottom #ideas:hover, #menu #menuRight #menuRightBottom #ideas.active {
+  background-position: -297px -142px;
+}
+#menu #menuRight #menuRightBottom #profiles {
+  background-repeat: no-repeat;
+  height: 26px;
+  float: left;
+  background-position: -365px -47px;
+  width: 93px;
+}
+#menu #menuRight #menuRightBottom #profiles:hover, #menu #menuRight #menuRightBottom #profiles.active {
+  background-position: -365px -142px;
+}
+#body #bodyLeft {
+  float: left;
+  padding-top: 30px;
+  padding-bottom: 50px;
+  padding-left: 45px;
+}
+#body #bodyRight {
+  float: left;
+  padding-top: 30px;
+  padding-left: 45px;
+  padding-bottom: 50px;
+}
+#body h1 {
+  font-weight: bold;
+  font-size: 20px;
+  width: auto;
+  margin-bottom: 20px;
+  color: #2e4652;
+  float: left;
+  background-color: #ffffff;
+  clear: both;
+  padding: 10px;
+}
+.listItem {
+  background-color: #ffffff;
+  clear: both;
+  width: 420px;
+}
+.listItem td {
+  vertical-align: top;
+  padding: 20px 20px 20px 0px;
+}
+.listItem .avatar {
+  margin-left: 20px;
+  width: 40px;
+  height: 40px;
+  background-color: #361f00;
+}
+.listItem .listItemText {
+  font-family: Helvetica, FreeSans, Arial, Tahoma, Sans;
+  font-size: 15px;
+  color: #361f00;
+}
+.listItem .listItemText a {
+  color: #96826e;
+  font-weight: bold;
+  text-decoration: none;
+}
+.listItem .listItemText a:hover {
+  color: #361f00;
+  text-decoration: underline;
+}
+.listItem .listItemStatus {
+  padding-top: 5px;
+  color: #999999;
+}
+.viewMoreButton {
+  clear: both;
+  width: 210px;
+  color: #2e4652;
+  border: 2px solid #ffffff;
+  background-color: #ffffff;
+  font-weight: bold;
+  font-size: 100%;
+  padding: 8px;
+  margin-top: 20px;
+  float: right;
+}
