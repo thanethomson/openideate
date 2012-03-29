@@ -18,7 +18,7 @@ def home(request):
 
 
 
-#@login_required
+@login_required
 def listing(request, who, what=constants.MENU_ITEM_BOTTOM_DEFAULT):
     """
     Renders the default template listing data according to the <who> and <what>

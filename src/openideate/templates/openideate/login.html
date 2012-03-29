@@ -1,0 +1,55 @@
+{% extends "openideate/base.html" %}
+
+{% block head %}
+    <style type="text/css" media="all">
+        body {
+            background-color: #bee7ff;
+        }
+    </style>
+{% endblock %}
+
+{% block main %}
+    <div id="login">
+        <div id="logo"><span class="dark">open</span><span class="light">ideate</span></div>
+        <div id="form">
+            <p>
+                Welcome to <b>openideate</b>, the open-source ideation platform. If you would like to set up
+                your own version of <b>openideate</b>, the code is freely available from the
+                <a href="https://github.com/thanethomson/openideate">GitHub repository</a>.
+            </p>
+            <p>
+                You may log in here. If you do not have an account, you may <a href="#">register for one here</a>.
+            </p>
+            {% if form.errors %}
+                <p class="error">
+                    Invalid username and/or password. Have you perhaps <a href="#">forgotten your password</a>?
+                </p>
+            {% endif %}
+            <p>
+                <form method="post" action="{% url login %}">
+                    {% csrf_token %}
+                    <table>
+                        <tr>
+                            <td class="label"><label for="id_username">Username:</label></td>
+                            <td>{{ form.username }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label"><label for="id_password">Password:</label></td>
+                            <td>{{ form.password }}</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>
+                                <div id="buttons">
+                                    <input type="submit" value="Login" />
+                                    <input type="reset" value="Clear" />
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <input type="hidden" name="next" value="{{ next }}" />
+                </form>
+            </p>
+        </div>
+    </div>
+{% endblock %}

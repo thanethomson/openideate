@@ -6,9 +6,13 @@ html, body {
     height: 100%;
 }
 
-body {
+.defaultFont {
     font-family: Helvetica, FreeSans, Arial, Tahoma, Verdana, Sans;
     font-size: 15px;
+}
+
+body {
+    .defaultFont;
     color: @background-red;
     background-color: @background-colour;
     letter-spacing: -0.2px;
@@ -29,6 +33,91 @@ body {
     .fullWidth;
     min-width: 1024px;
 }
+    #mainContainer #login {
+        margin: 0 auto;
+        width: @login-page-width;
+        margin-top: 50px;
+        padding: 80px;
+        background-color: #fff;
+        -moz-border-radius: 30px;
+        border-radius: 30px;
+        border: 5px solid @list-heading-colour;
+    }
+        #mainContainer #login #logo {
+            .chunkFont;
+            font-size: 60px;
+            padding-bottom: 40px;
+            text-align: center;
+        }
+            #mainContainer #login #logo .dark {
+                color: @list-heading-shadow-colour;
+            }
+            #mainContainer #login #logo .light {
+                color: @list-heading-colour;
+            }
+        
+        #mainContainer #login a {
+            font-weight: bold;
+            color: @login-link-colour;
+            text-decoration: none;
+        }
+            #mainContainer #login a:hover {
+                color: @login-link-hover-colour;
+            }
+        
+        #mainContainer #login form table {
+            padding-top: 10px;
+            //width: @login-page-width - (80*2);
+            //margin: 0 auto;
+        }
+            #mainContainer #login form table td {
+                padding: 0 20px 10px 0;
+            }
+                #mainContainer #login form table td.label {
+                    width: 80px;
+                }
+                #mainContainer #login form table td label {
+                    font-weight: bold;
+                    color: @list-heading-shadow-colour;
+                }
+                #mainContainer #login form table td input {
+                    .defaultFont;
+                    border: 3px solid @list-heading-colour;
+                    -moz-border-radius: 15px;
+                    border-radius: 15px;
+                    padding: 8px;
+                    width: 200px;
+                }
+        
+        #mainContainer #login form #buttons {
+            padding-top: 20px;
+        }
+            #mainContainer #login form #buttons input {
+                .chunkFont;
+                color: #fff;
+                background-color: @list-heading-colour;
+                padding: 10px;
+                border: 3px solid @list-heading-shadow-colour;
+                -moz-border-radius: 15px;
+                border-radius: 15px;
+                width: 100px;
+            }
+        
+        #mainContainer #login .error {
+            background-color: #ffc2bf;
+            padding: 20px;
+            border: 2px solid #800;
+            -moz-border-radius: 15px;
+            border-radius: 15px;
+            color: #800;
+        }
+            #mainContainer #login .error a {
+                color: #800;
+                text-decoration: none;
+            }
+                #mainContainer #login .error a:hover {
+                    text-decoration: underline;
+                }
 
 #headerContainer, #header {
     .fullWidth;
