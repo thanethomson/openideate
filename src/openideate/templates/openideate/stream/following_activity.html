@@ -1,0 +1,13 @@
+{% load timesince %}
+<table class="listItem">
+    <tr>
+        <td><div class="avatar"></div></td>
+        <td class="listItemText">
+            <a href="#">{{ item.user }}</a> has {{ item.get_action_display }}:
+            <a href="#">{{ item.idea_version.summary }}</a>.
+            <div class="listItemStatus">
+                {{ item.when|timesince_human }}
+            </div>
+        </td>
+    </tr>
+</table>

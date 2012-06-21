@@ -1,10 +1,14 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+
 import follow.utils
 from ckeditor.fields import RichTextField
 from string import ascii_letters, digits
 from openideate.exceptions import *
+import datetime
 
 from south.modelsinspector import add_introspection_rules
 add_introspection_rules([], [r"^ckeditor\.fields\.RichTextField"])
@@ -43,6 +47,14 @@ class Idea(models.Model):
         Returns a summary of the latest version of this idea, if it exists.
         """
         return self.latest_version.summary if self.versions.count() > 0 else _("Empty idea")
+        
+        
+    @property
+    def latest_version_tags(self):
+        """
+        Returns a list of tags associated with this idea's latest version.
+        """
+        return self.latest_version.tags.all() if self.versions.count() > 0 else []
 
 
     def get_user_privilege(self, user):
@@ -164,11 +176,15 @@ class IdeaVersion(models.Model):
     )
     tags = models.ManyToManyField(
         'IdeaTag',
+        blank=True,
+        null=True,
         related_name="idea_versions",
         help_text=_("The tags associated with this idea."),
     )
 
     modified_fields = models.CharField(
+        blank=True,
+        null=True,
         max_length=10, # for forward-compatibility
         help_text=_("A set of flags indicating which fields were modified "+
                     "from the previous version. See "+
@@ -217,6 +233,10 @@ class IdeaVersion(models.Model):
         if self.id and not override_save_check:
             raise IdeaVersionAlreadySaved
 
+        # first do the normal save operation
+        super(IdeaVersion, self).save(*args, **kwargs)
+        
+        # now create the appropriate actions
         older_versions = self.idea.versions.filter(created__lt=self.created).order_by('-created')
         self.modified_fields = ''
         # if there is an older version
@@ -263,16 +283,14 @@ class IdeaVersion(models.Model):
             self.add_action(UserAction.ACTION_NEW_IDEA_VERSION,
                 check_exists=override_save_check)
 
-        super(IdeaVersion, self).save(*args, **kwargs)
-
 
     def add_action(self, action, check_exists=False):
         """
         Helper shortcut to add user actions.
         """
         if check_exists:
-            if UserAction.objects.filter(user=self.created_by, \
-                    action=action, \
+            if UserAction.objects.filter(user=self.created_by,
+                    action=action,
                     idea_version=self).count() > 0:
                 # skip adding the action if it already exists
                 return
@@ -331,10 +349,10 @@ class UserAction(models.Model):
     ACTIONS = (
         (ACTION_NEW_IDEA,            _("added an idea")),
         (ACTION_NEW_IDEA_VERSION,    _("added an idea version")),
-        (ACTION_FORK_IDEA,           _("forked the idea")),
-        (ACTION_MODIFY_IDEA_SUMMARY, _("modified the idea's summary")),
-        (ACTION_MODIFY_IDEA_CONTENT, _("modified the idea's content")),
-        (ACTION_MODIFY_IDEA_TAGS,    _("modified the idea's tags")),
+        (ACTION_FORK_IDEA,           _("forked an idea")),
+        (ACTION_MODIFY_IDEA_SUMMARY, _("modified an idea's summary")),
+        (ACTION_MODIFY_IDEA_CONTENT, _("modified an idea's content")),
+        (ACTION_MODIFY_IDEA_TAGS,    _("modified an idea's tags")),
     )
 
 
@@ -414,9 +432,12 @@ class UserProfile(models.Model):
     user = models.OneToOneField(
         User,
         help_text=_("The user to whom this profile belongs."),
+        related_name='profile',
     )
     capabilities = models.ManyToManyField(
         'UserCapability',
+        blank=True,
+        null=True,
         related_name='profiles', # the profiles of users matching the particular capability
         help_text=_("This user's capabilities."),
     )
@@ -424,6 +445,21 @@ class UserProfile(models.Model):
     def __unicode__(self):
         return u'%s' % self.user
 
+
+@receiver(pre_save, sender=User)
+def user_pre_save(sender, **kwargs):
+    """
+    Function to make sure each user has a user profile associated
+    with them.
+    """
+    if 'instance' in kwargs:
+        try:
+            profile = kwargs['instance'].profile
+        except UserProfile.DoesNotExist:
+            kwargs['instance'].profile = UserProfile.objects.create(
+                user=kwargs['instance'],
+            )
+    
 
 
 class UserCapability(models.Model):
