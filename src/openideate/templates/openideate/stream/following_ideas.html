@@ -1,9 +1,9 @@
 {% load timesince %}
 <table class="listItem">
     <tr>
-        <td><div class="avatar"></div></td>
+        <td class="avatarContainer"><div class="avatar"></div></td>
         <td class="listItemText">
-            <a href="#">{{ item.latest_version_summary }}</a>:
+            <a href="#">{{ item.latest_version_summary }}</a>,
             {% for field in item.get_modified_fields %}
                 {% if forloop.last and not forloop.first %}and {% endif %}{{ field }}{% if not forloop.last %}, {% endif %}
             {% endfor %}

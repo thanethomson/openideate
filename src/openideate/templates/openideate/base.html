@@ -71,88 +71,18 @@
                 </div>
 
                 <div id="bodyRight">
-                    <h1>Here's the sub-title</h1>
-
-                    <table class="listItem">
-                        <tr>
-                            <td><div class="avatar"></div></td>
-                            <td class="listItemText">
-                                <a href="#">Thane Thomson</a> has modified the idea <a href="#">Open source ideation
-                                platform idea</a>, changing the description, contents and attachments.
-                                <div class="listItemStatus">
-                                    25 mins ago
-                                </div>
-                            </td>
-                        </tr>
-                    </table>
-
-                    <table class="listItem">
-                        <tr>
-                            <td><div class="avatar"></div></td>
-                            <td class="listItemText">
-                                <a href="#">Thane Thomson</a> has modified the idea <a href="#">Open source ideation
-                                platform idea</a>, changing the description, contents and attachments.
-                                <div class="listItemStatus">
-                                    25 mins ago
-                                </div>
-                            </td>
-                        </tr>
-                    </table>
+                    {% if page_subtitle %}<h1>{{ page_subtitle }}</h1>{% endif %}
                     
-                    <table class="listItem">
-                        <tr>
-                            <td><div class="avatar"></div></td>
-                            <td class="listItemText">
-                                <a href="#">Thane Thomson</a> has modified the idea <a href="#">Open source ideation
-                                platform idea</a>, changing the description, contents and attachments.
-                                <div class="listItemStatus">
-                                    25 mins ago
-                                </div>
-                            </td>
-                        </tr>
-                    </table>
-
-                    <table class="listItem">
-                        <tr>
-                            <td><div class="avatar"></div></td>
-                            <td class="listItemText">
-                                <a href="#">Thane Thomson</a> has modified the idea <a href="#">Open source ideation
-                                platform idea</a>, changing the description, contents and attachments.
-                                <div class="listItemStatus">
-                                    25 mins ago
-                                </div>
-                            </td>
-                        </tr>
-                    </table>
-
-                    <table class="listItem">
-                        <tr>
-                            <td><div class="avatar"></div></td>
-                            <td class="listItemText">
-                                <a href="#">Thane Thomson</a> has modified the idea <a href="#">Open source ideation
-                                platform idea</a>, changing the description, contents and attachments.
-                                <div class="listItemStatus">
-                                    25 mins ago
-                                </div>
-                            </td>
-                        </tr>
-                    </table>
-                    
-                    <table class="listItem">
-                        <tr>
-                            <td><div class="avatar"></div></td>
-                            <td class="listItemText">
-                                <a href="#">Thane Thomson</a> has modified the idea <a href="#">Open source ideation
-                                platform idea</a>, changing the description, contents and attachments.
-                                <div class="listItemStatus">
-                                    25 mins ago
-                                </div>
-                            </td>
-                        </tr>
-                    </table>
-                    
-                    <div class="viewMoreButton"><a href="#">View More</a></div>
-
+                    {% if substream %}
+                        {% for item in substream %}
+                            {{ item }}
+                        {% endfor %}
+                        
+                        <div class="viewMoreButton"><a href="#">View More</a></div>
+                        
+                    {% else %}
+                        <div class="listItemEmpty">Nothing to display here.</div>
+                    {% endif %}
                 </div>
             </div>
 

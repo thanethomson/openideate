@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.template.loader import render_to_string
 
 from openideate import constants
-from openideate.models import UserAction, Idea
+from openideate.models import UserAction, Idea, UserProfile
 from follow.models import Follow
 
 
@@ -37,6 +37,7 @@ def stream_listing(request, who, what=constants.MENU_ITEM_BOTTOM_DEFAULT):
         raise Http404
 
     page_title = constants.PAGE_TITLES[who][what]
+    page_subtitle = constants.PAGE_SUBTITLES[what]
     stream = get_stream_items(request, who, what)
     # render each of the stream items to a string
     stream_strings = [render_to_string('openideate/stream/%s_%s.html' % (who, what), {'item': item}) for item in stream]
@@ -47,6 +48,7 @@ def stream_listing(request, who, what=constants.MENU_ITEM_BOTTOM_DEFAULT):
             'menu_item_top_active': who,
             'menu_item_bottom_active': what,
             'page_title': page_title,
+            'page_subtitle': page_subtitle,
             'stream': stream_strings,
         },
         context_instance=RequestContext(request))
@@ -70,8 +72,13 @@ def get_stream_items(request, who, what):
         elif what == constants.MENU_ITEM_IDEAS:
             return Idea.objects.filter(follow_idea__user=request.user).order_by('-versions__created')
             
-        #elif what == constants.MENU_ITEM_PROFILES:
-            #return UserProfile.objects.filter(
+        elif what == constants.MENU_ITEM_PROFILES:
+            return UserProfile.objects.filter(user__follow_user__user=request.user).order_by('user__first_name', 'user__last_name', 'user__username')
+            
+    elif who == constants.MENU_ITEM_FOLLOWERS:
+        
+        if what == constants.MENU_ITEM_ACTIVITY:
+            return UserAction.objects.filter(user__in=request.user.follow_user.all()).order_by('-when')
             
     return []
 

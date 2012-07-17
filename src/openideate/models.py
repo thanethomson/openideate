@@ -393,7 +393,7 @@ class UserPrivilege(models.Model):
     PRIVILEGE_NONE  = 0 # the user has no privileges
     PRIVILEGE_READ  = 1 # the user can view the idea and its history
     PRIVILEGE_WRITE = 2 # the user can modify the idea
-    PRIVILEGE_ADMIN = 3 # the user has administrator rights to grant others privileges
+    PRIVILEGE_ADMIN = 3 # the user has administrator rights to grant others privileges and to delete the idea
 
     PRIVILEGES = (
         (PRIVILEGE_READ,  _('read')),
@@ -444,6 +444,12 @@ class UserProfile(models.Model):
 
     def __unicode__(self):
         return u'%s' % self.user
+    
+    @property
+    def name(self):
+        return (u'%s %s' % (self.user.first_name, self.user.last_name)) if self.user.first_name and self.user.last_name else \
+            self.user.first_name if self.user.first_name else \
+            self.user.username
 
 
 @receiver(pre_save, sender=User)
@@ -456,6 +462,7 @@ def user_pre_save(sender, **kwargs):
         try:
             profile = kwargs['instance'].profile
         except UserProfile.DoesNotExist:
+            # if it doesn't exist, create it
             kwargs['instance'].profile = UserProfile.objects.create(
                 user=kwargs['instance'],
             )
@@ -481,7 +488,7 @@ class UserCapability(models.Model):
 
     def save(self, *args, **kwargs):
         """
-        Overrides the save method to first convert the capability to lowercase.
+        Overrides the save method to first convert the capability name to lowercase.
         """
         self.name = self.name.lower()
         super(UserCapability, self).save(*args, **kwargs)

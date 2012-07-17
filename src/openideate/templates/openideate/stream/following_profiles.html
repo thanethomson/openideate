@@ -3,10 +3,9 @@
     <tr>
         <td class="avatarContainer"><div class="avatar"></div></td>
         <td class="listItemText">
-            <a href="#">{{ item.user }}</a> has {{ item.get_action_display }}:
-            <a href="#">{{ item.idea_version.summary }}</a>.
+            <a href="#">{{ item.name }}</a>{% if item.brief_bio %} - {{ item.brief_bio }}{% endif %}
             <div class="listItemStatus">
-                {{ item.when|timesince_human }}
+                Joined {{ item.user.date_joined|timesince_human }}
             </div>
         </td>
     </tr>

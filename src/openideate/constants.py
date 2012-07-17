@@ -52,4 +52,10 @@ PAGE_TITLES = {
     },
 }
 
+PAGE_SUBTITLES = {
+    MENU_ITEM_ACTIVITY: _("Interesting activity?"),
+    MENU_ITEM_IDEAS   : _("Interesting ideas?"),
+    MENU_ITEM_PROFILES: _("Interesting people?"),
+}
+
 
