@@ -44,5 +44,20 @@
   		<artifactId>vertx-web</artifactId>
   		<version>3.1.0</version>
   	</dependency>
+  	<dependency>
+  		<groupId>org.avaje.ebeanorm</groupId>
+  		<artifactId>avaje-ebeanorm</artifactId>
+  		<version>6.9.1</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>com.google.inject</groupId>
+  		<artifactId>guice</artifactId>
+  		<version>4.0</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>com.google.guava</groupId>
+  		<artifactId>guava</artifactId>
+  		<version>19.0-rc2</version>
+  	</dependency>
   </dependencies>
 </project>
