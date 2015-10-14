@@ -10,7 +10,11 @@ libraryDependencies ++= Seq(
   javaJdbc,
   cache,
   javaWs,
-  "org.postgresql" % "postgresql" % "9.4-1204-jdbc42"
+  "org.postgresql" % "postgresql" % "9.4-1204-jdbc42",
+  "be.objectify" %% "deadbolt-java" % "2.4.3",
+  "org.webjars" %% "webjars-play" % "2.4.0-1",
+  "org.webjars.bower" % "jquery" % "2.1.4",
+  "org.webjars.bower" % "bootstrap" % "3.3.5"
 )
 
 // Play provides two styles of routers, one expects its actions to be injected, the

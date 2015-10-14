@@ -1,0 +1,17 @@
+body {
+	padding-top: 70px;
+	background-color: #eee;
+}
+
+#loginForm {
+	margin: 0 auto;
+	max-width: 450px;
+	padding: 30px;
+	border-radius: 10px;
+	background-color: #fff;
+}
+
+	#loginForm h3 {
+		margin-top: 10px;
+		margin-bottom: 20px;
+	}

@@ -1,7 +1,5 @@
-@(message: String)
+@(request: play.mvc.Http.Request)
 
-@main("Welcome to Play") {
-
-    @play20.welcome(message, style = "Java")
-
+@base("Home", request) {
+	<h1>Hello world!</h1>
 }

@@ -1,0 +1,47 @@
+package security;
+
+import java.util.Optional;
+
+import be.objectify.deadbolt.core.models.Subject;
+import be.objectify.deadbolt.java.AbstractDeadboltHandler;
+import play.Logger;
+import play.libs.F.Promise;
+import play.mvc.Http.Context;
+import play.mvc.Result;
+import views.json.JsonError;
+
+/**
+ * Our internal Deadbolt handler for auth. For now, this does basic HTTP
+ * authentication.
+ */
+public class DefaultDeadboltHandler extends AbstractDeadboltHandler {
+  
+  private final static Logger.ALogger logger = Logger.of(DefaultDeadboltHandler.class);
+
+  @Override
+  public Promise<Optional<Result>> beforeAuthCheck(Context ctx) {
+    return Promise.promise(Optional::empty);
+  }
+  
+  /**
+   * Implements basic HTTP auth.
+   */
+  @Override
+  public Promise<Optional<Subject>> getSubject(final Context ctx) {
+    logger.debug("Attempting to get subject for default Deadbolt handler");
+    // check if we have the auth header
+    if (ctx.request().hasHeader("Authorization")) {
+      return BasicAuthHandler.handle(ctx.request().getHeader("Authorization"), ctx);
+    }
+    
+    // no access
+    return Promise.promise(Optional::empty);
+  }
+  
+  @Override
+  public Promise<Result> onAuthFailure(final Context ctx, final String content) {
+    // show a JSON error
+    return Promise.promise(() -> unauthorized(new JsonError("Unauthorized").toJson()));
+  }
+
+}

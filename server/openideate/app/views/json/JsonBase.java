@@ -1,15 +1,13 @@
 package views.json;
 
-import play.libs.Json;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
-/**
- * The generic base class for JSON objects.
- */
 public abstract class JsonBase {
-  
-  @Override
-  public String toString() {
-    return Json.toJson(this).toString();
-  }
+
+  /**
+   * Must be implemented in derived classes to return a Jackson-compatible
+   * object node.
+   */
+  public abstract ObjectNode toJson();
 
 }

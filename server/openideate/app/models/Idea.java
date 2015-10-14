@@ -4,25 +4,35 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.persistence.Version;
 
 import com.avaje.ebean.Model;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import constants.DateTimeFormats;
 import play.data.format.Formats;
 import play.data.validation.*;
+import play.libs.Json;
+import utils.JsonUtils;
 
 /**
  * Our primary model: the idea. This encapsulates all of the relevant
  * info relating to a logged idea.
  */
 @Entity
+@Table(name="ideas")
 public class Idea extends Model {
+  
+  public static Finder<Long, Idea> find = new Finder<Long, Idea>(Idea.class);
   
   @Id
   private Long id;
@@ -41,14 +51,14 @@ public class Idea extends Model {
   
   /** Who created this idea? */
   @Constraints.Required
-  @ManyToOne
+  @ManyToOne(cascade=CascadeType.ALL)
   private User creator;
   
   /** From which other idea did we fork this one? */
-  @ManyToOne
+  @ManyToOne(cascade=CascadeType.ALL)
   private Idea forkedFrom;
   
-  @ManyToMany
+  @ManyToMany(cascade=CascadeType.ALL)
   private List<IdeaTag> tags = new ArrayList<>();
   
   /** When this idea was created. */
@@ -61,6 +71,29 @@ public class Idea extends Model {
   
   
   public Idea() {}
+  
+  
+  /**
+   * Attempts to build this idea object up from the specified JSON node.
+   * @param json
+   * @param creator The user creating the idea.
+   */
+  public Idea(JsonNode json, User creator, Idea forkedFrom, List<IdeaTag> tags) {
+    if (json.hasNonNull("id"))
+      setId(JsonUtils.getLong(json, "id", null));
+    if (json.hasNonNull("version"))
+      setVersion(JsonUtils.getLong(json, "version", null));
+    
+    setTitle(JsonUtils.getString(json, "title", null));
+    setDetails(JsonUtils.getString(json, "details", null));
+    setCreator(creator);
+    
+    if (forkedFrom != null)
+      setForkedFrom(forkedFrom);
+    
+    if (tags != null)
+      setTags(tags);
+  }
 
 
   public Long getId() {
@@ -150,6 +183,30 @@ public class Idea extends Model {
 
   public void setWhenUpdated(Date whenUpdated) {
     this.whenUpdated = whenUpdated;
+  }
+  
+  /**
+   * Builds up the JSON object representing this instance.
+   * @return
+   */
+  public ObjectNode toJson() {
+    ObjectNode obj = Json.newObject();
+    ArrayNode tags;
+    
+    obj.put("id", getId());
+    obj.put("version", getVersion());
+    obj.put("title", getTitle());
+    obj.put("details", getDetails());
+    obj.put("creatorId", getCreator().getId());
+    obj.put("forkedFromId", getForkedFrom() != null ? getForkedFrom().getId() : null);
+    obj.put("created", DateTimeFormats.ISO8601_FORMAT.format(getWhenCreated()));
+    obj.put("updated", DateTimeFormats.ISO8601_FORMAT.format(getWhenUpdated()));
+    tags = obj.putArray("tags");
+    for (IdeaTag tag: getTags()) {
+      tags.add(tag.getName());
+    }
+    
+    return obj;
   }
 
 }
