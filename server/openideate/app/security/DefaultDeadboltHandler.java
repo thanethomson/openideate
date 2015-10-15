@@ -40,8 +40,9 @@ public class DefaultDeadboltHandler extends AbstractDeadboltHandler {
   
   @Override
   public Promise<Result> onAuthFailure(final Context ctx, final String content) {
-    // show a JSON error
-    return Promise.promise(() -> unauthorized(new JsonError("Unauthorized").toJson()));
+    ctx.response().setHeader("WWW-Authenticate", "Basic realm=\"openideate\"");
+    // ask the caller to authenticate
+    return Promise.promise(() -> status(401, new JsonError("Not authorized").toJson()));
   }
 
 }

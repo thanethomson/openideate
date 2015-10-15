@@ -1,5 +1,5 @@
-@(request: play.mvc.Http.Request)
+@(request: play.mvc.Http.Request, user: models.User)
 
-@base("Home", request) {
+@base("Home", request, user) {
 	<h1>Hello world!</h1>
 }

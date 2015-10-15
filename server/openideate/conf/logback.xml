@@ -14,9 +14,13 @@
   -->
   <logger name="play" level="INFO" />
   <logger name="application" level="DEBUG" />
+  <logger name="controllers.Application" level="DEBUG" />
   <logger name="controllers.api.UserController" level="DEBUG" />
   <logger name="controllers.api.IdeaController" level="DEBUG" />
+  <logger name="controllers.oauth.GitHub" level="DEBUG" />
   <logger name="security.DefaultDeadboltHandler" level="DEBUG" />
+  <logger name="security.FrontendDeadboltHandler" level="DEBUG" />
+  <logger name="security.BasicAuthHandler" level="DEBUG" />
 
   <root level="ERROR">
     <appender-ref ref="STDOUT" />

@@ -27,9 +27,12 @@ create table users (
   when_created              timestamp,
   email                     varchar(300),
   password_hash             varchar(100),
-  first_name                varchar(255),
-  last_name                 varchar(255),
+  name                      varchar(255),
   when_email_validated      timestamp,
+  signup_method             varchar(20),
+  avatar_url                text,
+  access_token              varchar(100),
+  constraint ck_users_signup_method check (signup_method in ('facebook','github','email','twitter','google')),
   constraint uq_users_email unique (email),
   constraint pk_users primary key (id))
 ;

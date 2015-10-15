@@ -1,27 +1,22 @@
-@(request: play.mvc.Http.Request)
+@(request: play.mvc.Http.Request, loginForm: play.data.Form[forms.LoginForm], oauthState: String)
+@import play.api.Play
 
-@base("Login", request) {
-	<form class="form-horizontal" id="loginForm">
-		<h3>Please sign in</h3>
-		<div class="form-group">
-			<div class="col-sm-12">
-				<input type="email" class="form-control" id="inputEmail" placeholder="Email" />
-			</div>
-		</div>
+@base("Login", request, null) {
+	<form class="form-horizontal solo-form" id="loginForm" method="post" action="@controllers.routes.Application.doLogin()" enctype="multipart/form-data">
+		<h3>Welcome!</h3>
 		
-		<div class="form-group">
-			<div class="col-sm-12">
-				<input type="password" class="form-control" id="inputPassword" placeholder="Password" />
-			</div>
-		</div>
+		<p>
+			Welcome to <b>OpenIdeate</b> - an open source platform through which you
+			can pool and share ideas with others. At present, we can only allow logging
+			in via GitHub.
+		</p>
 		
-		<button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+		<br />
 		
-		<div class="form-group">
-			<div class="col-sm-12">
-				<br />
-				Don't have an account yet? <a href="#">Sign up now!</a>
-			</div>
-		</div>
+		<a class="btn btn-lg btn-block btn-social btn-github"
+		 	href='https://github.com/login/oauth/authorize?scope=user:email&client_id=@Play.current.configuration.getString("oauth.github.clientid")&state=@oauthState'>
+			<i class="fa fa-github"></i> Sign in with GitHub
+		</a>
+		
 	</form>
 }

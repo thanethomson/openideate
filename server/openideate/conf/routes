@@ -2,9 +2,16 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# Home page
 GET     /                           @controllers.Application.index()
 GET     /login                      @controllers.Application.login()
+POST    /login                      @controllers.Application.doLogin()
+GET     /logout                     @controllers.Application.logout()
+GET     /signup                     @controllers.Application.signup()
+POST    /signup                     @controllers.Application.doSignup()
+
+# OAuth
+GET     /oauth/github               @controllers.oauth.GitHub.callback(code: String, state: String)
+GET     /oauth/github/success       @controllers.oauth.GitHub.success()
 
 # Users API
 GET     /api/user/:id               @controllers.api.UserController.getUser(id: Long)

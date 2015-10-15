@@ -31,7 +31,7 @@ public class UserController extends Controller {
     
     logger.debug(String.format("Received user creation request: %s", body.toString()));
     
-    Optional<Result> missing = JsonUtils.missingFieldsResult(body, "email", "password", "firstName", "lastName");
+    Optional<Result> missing = JsonUtils.missingFieldsResult(body, "email", "password", "name");
     
     if (missing.isPresent())
       return missing.get();
@@ -47,8 +47,7 @@ public class UserController extends Controller {
     user.setPasswordHash(
         PasswordUtils.computeHash(
             JsonUtils.getString(body, "password", null)));
-    user.setFirstName(JsonUtils.getString(body, "firstName", null));
-    user.setLastName(JsonUtils.getString(body, "lastName", null));
+    user.setName(JsonUtils.getString(body, "name", null));
     user.save();
     
     return ok(user.toJson());

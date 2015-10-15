@@ -59,4 +59,16 @@ public class BasicAuthHandler {
     return Promise.promise(Optional::empty);
   }
   
+  /**
+   * Helper function to generate an auth header.
+   * @param username
+   * @param password
+   * @return
+   */
+  public static String generateAuthHeader(String username, String password) {
+    return String.format("Basic %s",
+        Base64.getEncoder().encodeToString(
+            String.format("%s:%s", username, password).getBytes()));
+  }
+  
 }

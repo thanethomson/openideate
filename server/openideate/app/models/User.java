@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 
 import play.data.format.*;
@@ -20,6 +21,7 @@ import be.objectify.deadbolt.core.models.Permission;
 import be.objectify.deadbolt.core.models.Role;
 import be.objectify.deadbolt.core.models.Subject;
 import constants.DateTimeFormats;
+import constants.SignupMethod;
 
 /**
  * Encapsulates a system user.
@@ -45,15 +47,20 @@ public class User extends Model implements Subject {
   @Column(length=100)
   private String passwordHash;
   
-  /** Our user's first name. */
-  private String firstName;
-  
-  /** Our user's last name. */
-  private String lastName;
+  private String name;
   
   /** When was this user's e-mail address validated? */
   @Formats.DateTime(pattern=DateTimeFormats.ISO8601_FORMAT_STRING)
   private Date whenEmailValidated = null;
+  
+  @Column(length=20)
+  private SignupMethod signupMethod = null;
+  
+  @Lob
+  private String avatarUrl = null;
+  
+  @Column(length=100)
+  private String accessToken = null;
   
   
   public User() {
@@ -83,22 +90,6 @@ public class User extends Model implements Subject {
     this.email = email;
   }
 
-  public String getFirstName() {
-    return firstName;
-  }
-
-  public void setFirstName(String firstName) {
-    this.firstName = firstName;
-  }
-
-  public String getLastName() {
-    return lastName;
-  }
-
-  public void setLastName(String lastName) {
-    this.lastName = lastName;
-  }
-
   public Date getWhenEmailValidated() {
     return whenEmailValidated;
   }
@@ -121,8 +112,8 @@ public class User extends Model implements Subject {
     obj.put("id", getId());
     obj.put("email", getEmail());
     obj.put("created", DateTimeFormats.ISO8601_FORMAT.format(getWhenCreated()));
-    obj.put("firstName", getFirstName());
-    obj.put("lastName", getLastName());
+    obj.put("name", getName());
+    obj.put("avatarUrl", getAvatarUrl());
     
     return obj;
   }
@@ -148,6 +139,38 @@ public class User extends Model implements Subject {
 
   public void setPasswordHash(String passwordHash) {
     this.passwordHash = passwordHash;
+  }
+
+  public SignupMethod getSignupMethod() {
+    return signupMethod;
+  }
+
+  public void setSignupMethod(SignupMethod signupMethod) {
+    this.signupMethod = signupMethod;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getAvatarUrl() {
+    return avatarUrl;
+  }
+
+  public void setAvatarUrl(String avatarUrl) {
+    this.avatarUrl = avatarUrl;
+  }
+
+  public String getAccessToken() {
+    return accessToken;
+  }
+
+  public void setAccessToken(String accessToken) {
+    this.accessToken = accessToken;
   }
 
 }
