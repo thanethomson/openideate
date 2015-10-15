@@ -1,5 +1,117 @@
 @(request: play.mvc.Http.Request, user: models.User)
+@footer = {
+	<script>
+		function loadAllIdeas() {
+			$.ajax({
+				url: '@controllers.api.routes.IdeaController.listIdeas()',
+				accepts: 'application/json',
+				dataType: 'json',
+				method: 'GET',
+				headers: {
+					'Authorization': 'token @user.getAccessToken()'
+				}
+			}).done(function(data) {
+				console.log("Received idea listing: "+JSON.stringify(data));
+				// clear any existing info in the listing
+				$('#ideaListing').html("");
+				
+				if (data.total == 0) {
+					$('#ideaListing').html("No ideas found in the database.");
+				} else {
+					for (var i=0;i<data.ideas.length;i++) {
+						console.log(JSON.stringify(data.ideas[i]));
+						$('#ideaListing').append('<div class="row idea" id="idea'+i+'">'+
+								'<div class="col-md-2">'+
+									'Avatar'+
+								'</div>'+
+								'<div class="col-md-10">'+
+									'<h4></h4>'+
+									'<p></p>'+
+								'</div>'+
+								'</div></div>');
+						$('#ideaListing #idea'+i+' h4').text(data.ideas[i].title);
+						$('#ideaListing #idea'+i+' p').text(data.ideas[i].details);
+					}
+				}
+			});
+		}
+		
+		function newIdea() {
+			if ($('#titleInput').val().length < 1) {
+				window.alert("Please enter a title for your idea");
+			} else
+			if ($('#detailsInput').val().length < 1) {
+				window.alert("Please enter a detailed description of your idea");
+			} else
+			if ($('#tagsInput').val().length < 1) {
+				window.alert("Please enter at least one tag for your idea");
+			} else {
+				$.ajax({
+					url: '@controllers.api.routes.IdeaController.create()',
+					accepts: 'application/json',
+					contentType: 'application/json',
+					data: JSON.stringify({
+						title: $('#titleInput').val(),
+						details: $('#detailsInput').val(),
+						tags: $('#tagsInput').val().split(",")
+					}),
+					dataType: 'json',
+					method: 'POST',
+					headers: {
+						'Authorization': 'token @user.getAccessToken()'
+					}
+				}).done(function(data) {
+					console.log("Successfully created idea: "+JSON.stringify(data));
+					loadAllIdeas();
+				});
+			}
+		}
+		
+		$(document).ready(function() {
+			loadAllIdeas();
+			$('#createIdeaBtn').click(function() {
+				newIdea();
+				return false;
+			});
+		});
+	</script>
+}
 
-@base("Home", request, user) {
-	<h1>Hello world!</h1>
+@base("Home", request, user, null, footer) {
+	<div class="row">
+		<div class="col-md-7 bg">
+			<h3>Ideas</h3>
+			<div id="ideaListing">
+				Loading ideas...
+			</div>
+		</div>
+		<div class="col-md-1">&nbsp;</div>
+		<div class="col-md-4 bg">
+			<h3>New Idea</h3>
+			<form>
+				<div class="form-group">
+					<label for="titleInput">Title</label>
+					<span class="help-block">Give your idea a short, sharp, descriptive title.</span>
+					<input type="text" class="form-control" id="titleInput" />
+				</div>
+				
+				<div class="form-group">
+					<label for="detailsInput">Details</label>
+					<span class="help-block">This is where you enter as much detail as you can
+					regarding your idea.</span>
+					<textarea class="form-control" rows="5" id="detailsInput"></textarea>
+				</div>
+				
+				<div class="form-group">
+					<label for="tagsInput">Tags</label>
+					<span class="help-block">Enter one or more tags to help in categorising your idea.</span>
+					<input type="text" class="form-control" id="tagsInput" />
+				</div>
+				
+				<div class="form-group">
+					<button type="submit" class="btn btn-primary btn-lg btn-block" id="createIdeaBtn">Create!</button>
+				</div>
+			</form>
+		</div>
+	</div>
 }

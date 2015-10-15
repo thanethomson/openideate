@@ -21,6 +21,7 @@
   <logger name="security.DefaultDeadboltHandler" level="DEBUG" />
   <logger name="security.FrontendDeadboltHandler" level="DEBUG" />
   <logger name="security.BasicAuthHandler" level="DEBUG" />
+  <logger name="security.OAuthHandler" level="DEBUG" />
 
   <root level="ERROR">
     <appender-ref ref="STDOUT" />

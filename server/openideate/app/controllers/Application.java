@@ -2,7 +2,6 @@ package controllers;
 
 import java.util.UUID;
 
-import be.objectify.deadbolt.java.actions.SubjectNotPresent;
 import be.objectify.deadbolt.java.actions.SubjectPresent;
 import forms.LoginForm;
 import play.*;
@@ -73,6 +72,14 @@ public class Application extends Controller {
     }
     if (session().containsKey("oauthProvider")) {
       session().remove("oauthProvider");
+    }
+    
+    if (ctx().args.containsKey("user")) {
+      User user = (User)ctx().args.get("user");
+      
+      user.setAccessToken(null);
+      user.save();
+      logger.debug(String.format("Removed access token for user: %s", user.getEmail()));
     }
     
     return redirect(controllers.routes.Application.index());

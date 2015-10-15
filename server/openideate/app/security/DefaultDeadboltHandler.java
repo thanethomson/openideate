@@ -31,7 +31,13 @@ public class DefaultDeadboltHandler extends AbstractDeadboltHandler {
     logger.debug("Attempting to get subject for default Deadbolt handler");
     // check if we have the auth header
     if (ctx.request().hasHeader("Authorization")) {
-      return BasicAuthHandler.handle(ctx.request().getHeader("Authorization"), ctx);
+      String authStr = ctx.request().getHeader("Authorization");
+      
+      if (authStr.startsWith("Basic ")) {
+        return BasicAuthHandler.handle(authStr, ctx);
+      } else if (authStr.startsWith("token ")) {
+        return OAuthHandler.handle(authStr, ctx);
+      }
     }
     
     // no access
