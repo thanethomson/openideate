@@ -20,6 +20,8 @@ GET     /api/idea                   @controllers.api.IdeaController.listIdeas(q:
 POST    /api/idea                   @controllers.api.IdeaController.create()
 DELETE  /api/idea/:id               @controllers.api.IdeaController.delete(id: Long)
 POST    /api/idea/star/:id          @controllers.api.IdeaController.toggleStar(id: Long)
+POST    /api/idea/upvote/:id        @controllers.api.IdeaController.toggleUpvote(id: Long)
+POST    /api/idea/downvote/:id      @controllers.api.IdeaController.toggleDownvote(id: Long)
 
 GET     /api/idea/tag               @controllers.api.IdeaController.listTags()
 POST    /api/idea/tag               @controllers.api.IdeaController.createTag()

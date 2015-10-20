@@ -75,6 +75,12 @@ public class Idea extends Model {
   @OneToMany(cascade=CascadeType.ALL)
   private List<IdeaStar> starrings = new ArrayList<>();
   
+  @OneToMany(cascade=CascadeType.ALL)
+  private List<IdeaUpvote> upvotes = new ArrayList<>();
+  
+  @OneToMany(cascade=CascadeType.ALL)
+  private List<IdeaDownvote> downvotes = new ArrayList<>();
+  
   
   public Idea() {}
   
@@ -288,7 +294,19 @@ public class Idea extends Model {
     // if there's no upvote yet
     if (upvote == null) {
       return Ebean.execute(() -> {
-        // TODO: first try to delete any downvotes
+        // first try to delete any downvotes
+        IdeaDownvote.find.where()
+          .eq("idea.id", _this.getId())
+          .eq("user.id", byUser.getId())
+          .findEach(downvote -> {
+            // detach the downvote
+            downvote.setIdea(null);
+            downvote.setUser(null);
+            downvote.save();
+            // now delete it
+            downvote.delete();
+          });
+        
         // now create the new upvote
         IdeaUpvote _upvote = new IdeaUpvote();
         _upvote.setIdea(_this);
@@ -309,6 +327,58 @@ public class Idea extends Model {
   
   private IdeaUpvote getIdeaUpvote(User byUser) {
     return IdeaUpvote.find.where()
+        .eq("idea.id", getId())
+        .eq("user.id", byUser.getId())
+        .findUnique();
+  }
+  
+  /**
+   * Toggles the "downvote" status of this idea by the given user. Note that
+   * this automatically removes any "upvotes" associated with this idea for
+   * the given user.
+   * @param byUser
+   * @return
+   */
+  public IdeaDownvote toggleDownvote(final User byUser) {
+    IdeaDownvote downvote = getIdeaDownvote(byUser);
+    final Idea _this = this;
+    
+    // if there's no downvote yet
+    if (downvote == null) {
+      return Ebean.execute(() -> {
+        // first try to delete any upvotes
+        IdeaUpvote.find.where()
+          .eq("idea.id", _this.getId())
+          .eq("user.id", byUser.getId())
+          .findEach(upvote -> {
+            // detach the upvote
+            upvote.setIdea(null);
+            upvote.setUser(null);
+            upvote.save();
+            // now delete it
+            upvote.delete();
+          });
+        
+        // now create the new upvote
+        IdeaDownvote _downvote = new IdeaDownvote();
+        _downvote.setIdea(_this);
+        _downvote.setUser(byUser);
+        _downvote.save();
+        
+        return _downvote;
+      });
+    } else {
+      // delete the downvote
+      downvote.setIdea(null);
+      downvote.setUser(null);
+      downvote.save();
+      downvote.delete();
+      return null;
+    }
+  }
+  
+  private IdeaDownvote getIdeaDownvote(User byUser) {
+    return IdeaDownvote.find.where()
         .eq("idea.id", getId())
         .eq("user.id", byUser.getId())
         .findUnique();

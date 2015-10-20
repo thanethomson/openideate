@@ -16,13 +16,13 @@ import play.data.format.Formats;
 import play.libs.Json;
 
 /**
- * Represents a single upvote by a user for a single idea.
+ * Allows users to "downvote" specific ideas.
  */
 @Entity
-@Table(name="idea_upvotes")
-public class IdeaUpvote extends Model {
+@Table(name="idea_downvotes")
+public class IdeaDownvote extends Model {
   
-  public static Finder<Long, IdeaUpvote> find = new Finder<>(IdeaUpvote.class);
+  public static Finder<Long, IdeaDownvote> find = new Finder<>(IdeaDownvote.class);
   
   @Id
   private Long id;
@@ -35,37 +35,45 @@ public class IdeaUpvote extends Model {
   
   @ManyToOne(cascade=CascadeType.ALL)
   private User user;
-
   
-  public IdeaUpvote() {}
+
+  public IdeaDownvote() {}
+
 
   public Long getId() {
     return id;
   }
 
+
   public void setId(Long id) {
     this.id = id;
   }
+
 
   public Date getWhenCreated() {
     return whenCreated;
   }
 
+
   public void setWhenCreated(Date whenCreated) {
     this.whenCreated = whenCreated;
   }
+
 
   public Idea getIdea() {
     return idea;
   }
 
+
   public void setIdea(Idea idea) {
     this.idea = idea;
   }
 
+
   public User getUser() {
     return user;
   }
+
 
   public void setUser(User user) {
     this.user = user;

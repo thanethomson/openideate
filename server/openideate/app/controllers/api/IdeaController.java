@@ -14,8 +14,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import be.objectify.deadbolt.java.actions.SubjectPresent;
 import models.Idea;
+import models.IdeaDownvote;
 import models.IdeaStar;
 import models.IdeaTag;
+import models.IdeaUpvote;
 import models.User;
 import play.Logger;
 import play.libs.Json;
@@ -259,6 +261,43 @@ public class IdeaController extends Controller {
       return ok(new JsonMessage("Idea unstarred").toJson());
     } else {
       return ok(star.toJson());
+    }
+  }
+  
+  @SubjectPresent
+  public Result toggleUpvote(Long id) {
+    logger.debug(String.format("Attempting to toggle upvote status of idea with ID: %d", id));
+    
+    Idea idea = Idea.find.byId(id);
+    if (idea == null) {
+      return notFound(new JsonError("Cannot find the idea with the given ID").toJson());
+    }
+    
+    IdeaUpvote upvote = idea.toggleUpvote((User)ctx().args.get("user"));
+    
+    if (upvote == null) {
+      return ok(new JsonMessage("Upvote removed").toJson());
+    } else {
+      return ok(upvote.toJson());
+    }
+  }
+  
+  
+  @SubjectPresent
+  public Result toggleDownvote(Long id) {
+    logger.debug(String.format("Attempting to toggle downvote status of idea with ID: %d", id));
+    
+    Idea idea = Idea.find.byId(id);
+    if (idea == null) {
+      return notFound(new JsonError("Cannot find the idea with the given ID").toJson());
+    }
+    
+    IdeaDownvote downvote = idea.toggleDownvote((User)ctx().args.get("user"));
+    
+    if (downvote == null) {
+      return ok(new JsonMessage("Downvote removed").toJson());
+    } else {
+      return ok(downvote.toJson());
     }
   }
 
