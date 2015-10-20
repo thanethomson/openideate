@@ -3,23 +3,23 @@
 # ~~~~
 
 GET     /                           @controllers.Application.index()
-GET     /login                      @controllers.Application.login()
-POST    /login                      @controllers.Application.doLogin()
-GET     /logout                     @controllers.Application.logout()
-GET     /signup                     @controllers.Application.signup()
-POST    /signup                     @controllers.Application.doSignup()
+GET     /mine                       @controllers.Application.myIdeas()
+GET     /starred                    @controllers.Application.myStarredIdeas()
+GET     /tagged/:tag                @controllers.Application.listIdeasByTag(tag: String)
 
 # OAuth
-GET     /oauth/github               @controllers.oauth.GitHub.callback(code: String, state: String)
-GET     /oauth/github/success       @controllers.oauth.GitHub.success()
+GET     /login                      @controllers.Application.login()
+GET     /logout                     @controllers.Application.logout()
+GET     /authenticate/:provider     @controllers.Application.authenticate(provider: String)
 
 # Users API
-GET     /api/user/:id               @controllers.api.UserController.getUser(id: Long)
-POST    /api/user                   @controllers.api.UserController.signUp()
+GET     /api/user/:id               @controllers.api.UserController.getUserById(id: Long)
 
 # Ideas API
-GET     /api/idea                   @controllers.api.IdeaController.listIdeas(q: String ?= "", pageNo: Int ?= 0, pageSize: Int ?= 50, order: String ?= "whenUpdated", dir: String ?= "desc", tags: String ?= "")
+GET     /api/idea                   @controllers.api.IdeaController.listIdeas(q: String ?= "", pageNo: Int ?= 0, pageSize: Int ?= 50, order: String ?= "whenUpdated", dir: String ?= "desc", tags: String ?= "", creatorId: Long ?= -1, starredById: Long ?= -1)
 POST    /api/idea                   @controllers.api.IdeaController.create()
+DELETE  /api/idea/:id               @controllers.api.IdeaController.delete(id: Long)
+POST    /api/idea/star/:id          @controllers.api.IdeaController.toggleStar(id: Long)
 
 GET     /api/idea/tag               @controllers.api.IdeaController.listTags()
 POST    /api/idea/tag               @controllers.api.IdeaController.createTag()

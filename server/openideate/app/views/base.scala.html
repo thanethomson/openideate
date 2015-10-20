@@ -1,4 +1,4 @@
-@(title: String, request: play.mvc.Http.Request, user: models.User, header: Html = Html(""), footer: Html = Html(""))(content: Html)
+@(title: String, page: String, request: play.mvc.Http.Request, user: models.User, header: Html = Html(""), footer: Html = Html(""))(content: Html)
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -28,9 +28,9 @@
 	        <div id="navbar" class="collapse navbar-collapse">
 	          @if(user != null) {
 	          	  <ul class="nav navbar-nav">
-		            <li class="active"><a href="@controllers.routes.Application.index()">Home</a></li>
-		            <li><a href="#about">About</a></li>
-		            <li><a href="#contact">Contact</a></li>
+		            <li@if(page=="home"){ class="active"}><a href="@controllers.routes.Application.index()">All</a></li>
+		            <li@if(page=="mine"){ class="active"}><a href="@controllers.routes.Application.myIdeas()">Mine</a></li>
+		            <li@if(page=="starred"){ class="active"}><a href="@controllers.routes.Application.myStarredIdeas()">Starred</a></li>
 		          </ul>
 		          <ul class="nav navbar-nav navbar-right">
 		          	<li><a href="@controllers.routes.Application.logout()">Logout</a></li>

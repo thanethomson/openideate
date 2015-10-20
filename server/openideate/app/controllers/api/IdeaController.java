@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import be.objectify.deadbolt.java.actions.SubjectPresent;
 import models.Idea;
+import models.IdeaStar;
 import models.IdeaTag;
 import models.User;
 import play.Logger;
@@ -22,6 +23,7 @@ import play.mvc.*;
 import utils.JsonUtils;
 import utils.TagUtils;
 import views.json.JsonError;
+import views.json.JsonMessage;
 
 /**
  * Our idea management API.
@@ -120,13 +122,25 @@ public class IdeaController extends Controller {
    * @param order
    * @param dir
    * @param tags
+   * @param creatorId
+   * @param starredById
    * @return
    */
   @SubjectPresent
-  public Result listIdeas(String q, int pageNo, int pageSize, String order, String dir, String tags) {
+  public Result listIdeas(String q, int pageNo, int pageSize, String order,
+      String dir, String tags, long creatorId, long starredById) {
     ObjectNode obj = Json.newObject();
     ArrayNode arr = obj.putArray("ideas");
     ExpressionList<Idea> expr = Idea.find.where();
+    User user = (User)ctx().args.get("user");
+    
+    if (creatorId >= 0) {
+      expr = expr.eq("creator.id", creatorId);
+    }
+    
+    if (starredById >= 0) {
+      expr = expr.eq("starrings.user.id", starredById);
+    }
     
     if (q != null && q.length() > 0) {
       expr = expr.icontains("title", q);
@@ -152,7 +166,7 @@ public class IdeaController extends Controller {
       .findPagedList(pageNo, pageSize);
     
     for (Idea idea: results.getList()) {
-      arr.add(idea.toJson());
+      arr.add(idea.toJson(user));
     }
     
     obj.put("pageNo", pageNo);
@@ -207,6 +221,45 @@ public class IdeaController extends Controller {
     
     // show our tag
     return ok(tag.toJson());
+  }
+  
+  
+  @SubjectPresent
+  public Result delete(Long id) {
+    logger.debug(String.format("Attempting to delete idea with ID: %d", id));
+    Idea idea = Idea.find.byId(id);
+    
+    if (idea == null) {
+      return notFound(new JsonError("Cannot find the idea with the given ID").toJson());
+    }
+    
+    // delete the idea
+    idea.delete();
+    return ok(new JsonMessage("Deleted").toJson());
+  }
+  
+  
+  /**
+   * Toggles the "starred" status of the idea with the specified ID.
+   * @param id
+   * @return
+   */
+  @SubjectPresent
+  public Result toggleStar(Long id) {
+    logger.debug(String.format("Attempting to toggle starred status of idea with ID: %d", id));
+    
+    Idea idea = Idea.find.byId(id);
+    if (idea == null) {
+      return notFound(new JsonError("Cannot find the idea with the given ID").toJson());
+    }
+    
+    IdeaStar star = idea.toggleStar((User)ctx().args.get("user"));
+    
+    if (star == null) {
+      return ok(new JsonMessage("Idea unstarred").toJson());
+    } else {
+      return ok(star.toJson());
+    }
   }
 
 }

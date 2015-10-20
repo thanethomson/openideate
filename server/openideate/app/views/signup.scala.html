@@ -1,7 +1,0 @@
-@(request: play.mvc.Http.Request, signupForm: play.data.Form[forms.SignupForm])
-
-@base("Sign Up", request, null) {
-	<form class="form-horizontal solo-form" id="signupForm" method="post" action="@controllers.routes.Application.doSignup()">
-		<h3>Sign Up</h3>
-	</form>
-}

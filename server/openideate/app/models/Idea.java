@@ -10,10 +10,13 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Model;
+import com.avaje.ebean.PagedList;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -68,6 +71,9 @@ public class Idea extends Model {
   /** When this idea was last updated. */
   @Formats.DateTime(pattern=DateTimeFormats.ISO8601_FORMAT_STRING)
   private Date whenUpdated = new Date();
+  
+  @OneToMany(cascade=CascadeType.ALL)
+  private List<IdeaStar> starrings = new ArrayList<>();
   
   
   public Idea() {}
@@ -205,8 +211,174 @@ public class Idea extends Model {
     for (IdeaTag tag: getTags()) {
       tags.add(tag.getName());
     }
+    obj.put("stars", getStarredCount());
+    obj.put("upVotes", getUpvoteCount());
+    obj.put("downVotes", 0);
     
     return obj;
+  }
+  
+  public ObjectNode toJson(User user) {
+    ObjectNode obj = toJson();
+    
+    // has this idea been starred by this user?
+    obj.put("starred", (getIdeaStar(user) != null));
+    // has this idea been upvoted by this user?
+    obj.put("upvoted", (getIdeaUpvote(user) != null));
+    
+    return obj;
+  }
+  
+  /**
+   * Helps to star this idea by the specified user.
+   * @param byUser
+   * @return
+   */
+  public IdeaStar star(User byUser) {
+    IdeaStar ideaStar = getIdeaStar(byUser);
+    
+    if (ideaStar == null) {
+      ideaStar = new IdeaStar();
+      ideaStar.setIdea(this);
+      ideaStar.setUser(byUser);
+      starrings.add(ideaStar);
+      save();
+    }
+    
+    return ideaStar;
+  }
+  
+  /**
+   * Toggles the "starred" status of this idea by the given user.
+   * @param byUser
+   * @return
+   */
+  public IdeaStar toggleStar(User byUser) {
+    IdeaStar ideaStar = getIdeaStar(byUser);
+    
+    if (ideaStar == null) {
+      ideaStar = new IdeaStar();
+      ideaStar.setIdea(this);
+      ideaStar.setUser(byUser);
+      starrings.add(ideaStar);
+      save();
+    } else {
+      // delete the star
+      ideaStar.setIdea(null);
+      ideaStar.setUser(null);
+      ideaStar.save();
+      ideaStar.delete();
+      ideaStar = null;
+    }
+    
+    return ideaStar;
+  }
+  
+  /**
+   * Toggles the "upvote" status of this idea by the given user. Note that
+   * this automatically removes any "downvotes" associated with this idea for
+   * the given user.
+   * @param byUser
+   * @return
+   */
+  public IdeaUpvote toggleUpvote(final User byUser) {
+    IdeaUpvote upvote = getIdeaUpvote(byUser);
+    final Idea _this = this;
+    
+    // if there's no upvote yet
+    if (upvote == null) {
+      return Ebean.execute(() -> {
+        // TODO: first try to delete any downvotes
+        // now create the new upvote
+        IdeaUpvote _upvote = new IdeaUpvote();
+        _upvote.setIdea(_this);
+        _upvote.setUser(byUser);
+        _upvote.save();
+        
+        return _upvote;
+      });
+    } else {
+      // delete the upvote
+      upvote.setIdea(null);
+      upvote.setUser(null);
+      upvote.save();
+      upvote.delete();
+      return null;
+    }
+  }
+  
+  private IdeaUpvote getIdeaUpvote(User byUser) {
+    return IdeaUpvote.find.where()
+        .eq("idea.id", getId())
+        .eq("user.id", byUser.getId())
+        .findUnique();
+  }
+  
+  /**
+   * Attempts to retrieve the number of "upvotes" of this idea.
+   * @return
+   */
+  public long getUpvoteCount() {
+    return IdeaUpvote.find.where()
+        .eq("idea.id", getId())
+        .findRowCount();
+  }
+  
+  /**
+   * Attempts to retrieve the number of "starrings" of this idea.
+   * @return
+   */
+  public long getStarredCount() {
+    return IdeaStar.find.where()
+        .eq("idea.id", getId())
+        .findRowCount();
+  }
+  
+  /**
+   * Helps to find the ideas starred by the specified user.
+   * @param byUser
+   * @param pageNo
+   * @param pageSize
+   * @return
+   */
+  public static PagedList<Idea> findStarred(User byUser, int pageNo, int pageSize) {
+    return Idea.find.where()
+        .eq("starrings.user.id", byUser.getId())
+        .findPagedList(pageNo, pageSize);
+  }
+  
+  
+  /**
+   * Helps to check whether the given idea is already starred by the given user.
+   * @param user
+   * @param idea
+   * @return
+   */
+  public static boolean isStarred(User user, Idea idea) {
+    return (idea.getIdeaStar(user) != null);
+  }
+  
+  /**
+   * Tries to get the IdeaStar object associated with the starring of this idea
+   * by the given user, if any.
+   * @param byUser
+   * @return
+   */
+  private IdeaStar getIdeaStar(User byUser) {
+    return IdeaStar.find.where()
+        .eq("idea.id", getId())
+        .eq("user.id", byUser.getId())
+        .findUnique();
+  }
+
+
+  public List<IdeaStar> getStarrings() {
+    return starrings;
+  }
+
+
+  public void setStarrings(List<IdeaStar> starrings) {
+    this.starrings = starrings;
   }
 
 }

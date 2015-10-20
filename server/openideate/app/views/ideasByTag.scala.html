@@ -1,9 +1,9 @@
-@(request: play.mvc.Http.Request, user: models.User)
+@(request: play.mvc.Http.Request, user: models.User, tag: String)
 @footer = {
 	@commonScript(request, user)
 	<script>
 		$(document).ready(function() {
-			loadAllIdeas();
+			loadIdeasByTag('@tag');
 			$('#createIdeaBtn').click(function() {
 				newIdea();
 				return false;
@@ -12,10 +12,10 @@
 	</script>
 }
 
-@base("Home", "home", request, user, null, footer) {
+@base("Tagged Ideas", "home", request, user, null, footer) {
 	<div class="row">
 		<div class="col-md-7 bg">
-			<h3>All Ideas</h3>
+			<h3>Ideas Tagged: @tag</h3>
 			<div id="ideaListing">
 				Loading ideas...
 			</div>

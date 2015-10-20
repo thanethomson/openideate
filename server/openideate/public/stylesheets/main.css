@@ -28,3 +28,20 @@ body {
 	margin: 30px;
 	border-radius: 10px;
 }
+
+#ideaListing .idea-avatar-small img {
+	max-width: 64px;
+	max-height: 64px;
+	height: auto;
+	margin: 0 auto;
+}
+
+#ideaListing .idea-body p.buttons {
+	text-align: right;
+}
+
+#ideaListing .idea-body .author {
+	font-size: 80%;
+	font-weight: bold;
+	color: #888;
+}

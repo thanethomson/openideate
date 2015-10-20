@@ -1,0 +1,262 @@
+@(request: play.mvc.Http.Request, user: models.User)
+<script src='@routes.WebJarAssets.at(WebJarAssets.locate("jquery-dateFormat.min.js"))'></script>
+<script src='@routes.WebJarAssets.at(WebJarAssets.locate("markdown-it.min.js"))'></script>
+<script>
+	var usersById = {};
+	var reloadIdeas;
+	var md = window.markdownit();
+	var ideasByTag = null;
+	var curPage = 0, ideasPerPage = 25;
+
+	function loadAllIdeas() {
+		$.ajax({
+			url: '@controllers.api.routes.IdeaController.listIdeas()?pageNo='+curPage+'&pageSize='+ideasPerPage,
+			accepts: 'application/json',
+			dataType: 'json',
+			method: 'GET'
+		}).done(function(data) {
+			console.log("Received idea listing: "+JSON.stringify(data));
+			populateIdeaListing('#ideaListing', data);
+		});
+		
+		reloadIdeas = loadAllIdeas;
+	}
+	
+	function loadMyIdeas() {
+		$.ajax({
+			url: '@controllers.api.routes.IdeaController.listIdeas()?creatorId=@user.getId()&pageNo='+curPage+'&pageSize='+ideasPerPage,
+			accepts: 'application/json',
+			dataType: 'json',
+			method: 'GET'
+		}).done(function(data) {
+			console.log("Received my ideas listing: "+JSON.stringify(data));
+			populateIdeaListing('#ideaListing', data);
+		});
+		
+		reloadIdeas = loadMyIdeas;
+	}
+	
+	function loadMyStarredIdeas() {
+		$.ajax({
+			url: '@controllers.api.routes.IdeaController.listIdeas()?starredById=@user.getId()&pageNo='+curPage+'&pageSize='+ideasPerPage,
+			accepts: 'application/json',
+			dataType: 'json',
+			method: 'GET'
+		}).done(function(data) {
+			console.log("Received my ideas listing: "+JSON.stringify(data));
+			populateIdeaListing('#ideaListing', data);
+		});
+		
+		reloadIdeas = loadMyStarredIdeas;
+	}
+	
+	function loadIdeasByTag(tag) {
+		if (!tag) {
+			tag = ideasByTag;
+		}
+		
+		$.ajax({
+			url: '@controllers.api.routes.IdeaController.listIdeas()?tags='+tag+'&pageNo='+curPage+'&pageSize='+ideasPerPage,
+			accepts: 'application/json',
+			dataType: 'json',
+			method: 'GET'
+		}).done(function(data) {
+			console.log("Received my ideas listing: "+JSON.stringify(data));
+			populateIdeaListing('#ideaListing', data);
+		});
+		
+		reloadIdeas = loadIdeasByTag;
+		ideasByTag = tag;
+	}
+	
+	function ideaToggleStarred(ctrl, ideaId) {
+		if ($(ctrl+' #idea'+ideaId).length) {
+			// fire off the ajax request to toggle the starring of the idea
+			$.ajax({
+				url: '@controllers.api.routes.IdeaController.toggleStar(-1)'.replace('-1', ideaId),
+				accepts: 'application/json',
+				dataType: 'json',
+				method: 'POST'
+			}).done(function(data) {
+				console.log('Received data after toggling idea starred status: '+JSON.stringify(data));
+				// if we've successfully starred the idea
+				if (data.id) {
+					$(ctrl+' #idea'+ideaId).attr("starred", "true");
+					$(ctrl+' #idea'+ideaId+' .idea-body p.buttons .star').addClass('btn-warning');
+				} else {
+					$(ctrl+' #idea'+ideaId).attr("starred", "false");
+					$(ctrl+' #idea'+ideaId+' .idea-body p.buttons .star').removeClass('btn-warning');
+				}
+			});
+		}
+	}
+	
+	function ideaToggleUpvote(ctrl, ideaId) {
+		if ($(ctrl+' #idea'+ideaId).length) {
+			// fire off the ajax request to toggle the upvoting of the idea
+		}
+	}
+	
+	function populateIdeaListing(ctrl, data) {
+		// if we're loading the very first page,
+		// clear any existing info in the listing
+		if (data.pageNo == 0) {
+			$(ctrl).html("");
+			if (data.total == 0) {
+				$(ctrl).html("No ideas yet.");
+				return;
+			}
+		}
+		// otherwise we're just loading more ideas
+		
+		var idea, created;
+		
+		for (var i=0;i<data.ideas.length;i++) {
+			idea = data.ideas[i];
+			
+			// check if we already have this idea listed
+			if ($(ctrl+' #idea'+idea.id).length) {
+				console.log('Idea with ID '+idea.id+' already exists - skipping');
+				continue;
+			}
+			
+			$(ctrl).append('<div class="row idea" id="idea'+idea.id+'" idea-id="'+idea.id+'">'+
+					'<div class="col-md-2 idea-avatar-small">'+
+						'Avatar'+
+					'</div>'+
+					'<div class="col-md-10 idea-body">'+
+						'<h4></h4>'+
+						'<p class="author">By <a class="name" href="#"></a>, <span class="created"></span></p>'+
+						'<p class="details"></p>'+
+						'<p class="tags"></p>'+
+						'<p class="comment-box"></p>'+
+						'<p class="comments"></p>'+
+					'</div>'+
+				'</div>');
+			$(ctrl+' #idea'+idea.id+' h4').text(idea.title);
+			$(ctrl+' #idea'+idea.id+' h4').append('&nbsp;<span class="badge"><span class="glyphicon glyphicon-thumbs-up">'+idea.upVotes+'</span></span>');
+			$(ctrl+' #idea'+idea.id+' h4').append('&nbsp;<span class="badge"><span class="glyphicon glyphicon-thumbs-down">'+idea.downVotes+'</span></span>');
+			$(ctrl+' #idea'+idea.id+' h4').append('&nbsp;<span class="badge"><span class="glyphicon glyphicon-star">'+idea.stars+'</span></span>');
+			
+			created = Date.parse(idea.created);
+			console.log('Idea created: '+created);
+			$(ctrl+' #idea'+idea.id+' .idea-body .author .created').text($.format.date(created, "d MMM yyyy HH:mm"));
+			// render the Markdown version of the idea details
+			$(ctrl+' #idea'+idea.id+' p.details').html(md.render(idea.details));
+			$.each(idea.tags, function(index, tag) {
+				$(ctrl+' #idea'+idea.id+' p.tags').append('&nbsp;<a href="#" class="tag'+index+'"><span class="label label-primary"></span></a>');
+				$(ctrl+' #idea'+idea.id+' p.tags .tag'+index).attr('href', '@controllers.routes.Application.listIdeasByTag("")'+tag);
+				$(ctrl+' #idea'+idea.id+' p.tags .tag'+index+' span').text(tag);
+			});
+			$(ctrl+' #idea'+idea.id+' .idea-body').append('<p class="buttons"></p>');
+			$(ctrl+' #idea'+idea.id+' .idea-body p.buttons').append(
+					'<button type="button" class="btn btn-sm upvote" arial-label="Upvote" title="Upvote">'+
+						'<span class="glyphicon glyphicon-thumbs-up"></span>'+
+					'</button>&nbsp;'+
+					'<button type="button" class="btn btn-sm downvote" arial-label="Downvote" title="Downvote">'+
+						'<span class="glyphicon glyphicon-thumbs-down"></span>'+
+					'</button>&nbsp;'+
+					'<button type="button" class="btn btn-sm fork" arial-label="Fork" title="Fork">'+
+						'<span class="glyphicon glyphicon-duplicate"></span>'+
+					'</button>&nbsp;'+
+					'<button type="button" class="btn btn-sm star" arial-label="Star" title="Star">'+
+						'<span class="glyphicon glyphicon-star"></span>'+
+					'</button>'+
+				'</p>');
+			
+			$(ctrl+' #idea'+idea.id+' .idea-body p.buttons .star').click(function() {
+				ideaToggleStarred(ctrl, idea.id);
+			});
+			
+			// check if the idea is starred by this user
+			if (idea.starred) {
+				$(ctrl+' #idea'+idea.id+' .idea-body p.buttons .star').attr('starred', "true");
+				$(ctrl+' #idea'+idea.id+' .idea-body p.buttons .star').addClass("btn-warning");
+			}
+			
+			// get the user's details
+			getUserById(idea.creatorId, idea, function(user, idea) {
+				$(ctrl+' #idea'+idea.id+' .idea-body .author .name').text(user.name);
+				$(ctrl+' #idea'+idea.id+' .idea-avatar-small').html('<img />');
+				$(ctrl+' #idea'+idea.id+' .idea-avatar-small img').attr('src', user.pictureUrl);
+				$(ctrl+' #idea'+idea.id+' .idea-avatar-small img').attr('title', user.name);
+				$(ctrl+' #idea'+idea.id+' .idea-avatar-small img').addClass('img-rounded');
+				
+				// if this is our currently logged in user
+				if (user.id == @user.getId()) {
+					$(ctrl+' #idea'+idea.id+' .idea-body p.buttons').prepend(
+							'<button type="button" class="btn btn-sm btn-danger" arial-label="Delete" title="Delete">'+
+								'<span class="glyphicon glyphicon-remove"></span>'+
+							'</button>&nbsp;'
+							);
+				}
+			});
+		}
+		
+		// delete any existing "more" buttons
+		$(ctrl+' #moreButton').remove();
+		if (((data.pageNo+1) * data.pageSize) < data.total) {
+			$(ctrl).append('<div class="row" id="moreButton"><div class="col-md-12"><button type="button" class="btn btn-lg btn-block btn-primary">More</button></div></div>');
+			$(ctrl+' #moreButton button').click(function(e) {
+				curPage++;
+				console.log("Now loading more data for page: "+curPage);
+				reloadIdeas();
+			});
+		}
+	}
+	
+	function getUserById(id, ideaId, callback) {
+		console.log('Attempting to get user by ID: '+id);
+		// if we've got a cached version of the user
+		if (usersById.hasOwnProperty(id)) {
+			console.log('Cached users: '+JSON.stringify(usersById));
+			// return the cached version
+			callback(usersById[id], ideaId);
+		} else {
+			// load the user
+			$.ajax({
+				url: '@controllers.api.routes.UserController.getUserById(-1)'.replace('-1', id),
+				accepts: 'application/json',
+				dataType: 'json',
+				method: 'GET'
+			}).done(function(data) {
+				console.log('Received user data: '+JSON.stringify(data));
+				// cache the user object
+				usersById[id] = data;
+				callback(data, ideaId);
+			});
+		}
+	}
+	
+	function newIdea() {
+		if ($('#titleInput').val().length < 1) {
+			window.alert("Please enter a title for your idea");
+		} else
+		if ($('#detailsInput').val().length < 1) {
+			window.alert("Please enter a detailed description of your idea");
+		} else
+		if ($('#tagsInput').val().length < 1) {
+			window.alert("Please enter at least one tag for your idea");
+		} else {
+			$.ajax({
+				url: '@controllers.api.routes.IdeaController.create()',
+				accepts: 'application/json',
+				contentType: 'application/json',
+				data: JSON.stringify({
+					title: $('#titleInput').val(),
+					details: $('#detailsInput').val(),
+					tags: $('#tagsInput').val().split(",")
+				}),
+				dataType: 'json',
+				method: 'POST'
+			}).done(function(data) {
+				console.log("Successfully created idea: "+JSON.stringify(data));
+				// clear the new idea input
+				$('#titleInput').val('');
+				$('#detailsInput').val('');
+				$('#tagsInput').val('');
+				reloadIdeas();
+			});
+		}
+	}
+</script>

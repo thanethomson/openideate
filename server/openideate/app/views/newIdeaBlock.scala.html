@@ -1,0 +1,28 @@
+@()
+<div class="col-md-4 bg">
+	<h3>New Idea</h3>
+	<form>
+		<div class="form-group">
+			<label for="titleInput">Title</label>
+			<span class="help-block">Give your idea a short, sharp, descriptive title.</span>
+			<input type="text" class="form-control" id="titleInput" />
+		</div>
+		
+		<div class="form-group">
+			<label for="detailsInput">Details</label>
+			<span class="help-block">This is where you enter as much detail as you can
+			regarding your idea. We support <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet">Markdown</a> formatting here.</span>
+			<textarea class="form-control" rows="5" id="detailsInput"></textarea>
+		</div>
+		
+		<div class="form-group">
+			<label for="tagsInput">Tags</label>
+			<span class="help-block">Enter one or more tags to help in categorising your idea (comma-separated).</span>
+			<input type="text" class="form-control" id="tagsInput" />
+		</div>
+		
+		<div class="form-group">
+			<button type="submit" class="btn btn-primary btn-lg btn-block" id="createIdeaBtn">Create!</button>
+		</div>
+	</form>
+</div>

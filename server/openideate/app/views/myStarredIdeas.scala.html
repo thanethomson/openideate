@@ -3,7 +3,7 @@
 	@commonScript(request, user)
 	<script>
 		$(document).ready(function() {
-			loadAllIdeas();
+			loadMyStarredIdeas();
 			$('#createIdeaBtn').click(function() {
 				newIdea();
 				return false;
@@ -12,10 +12,10 @@
 	</script>
 }
 
-@base("Home", "home", request, user, null, footer) {
+@base("My Starred Ideas", "starred", request, user, null, footer) {
 	<div class="row">
 		<div class="col-md-7 bg">
-			<h3>All Ideas</h3>
+			<h3>My Starred Ideas</h3>
 			<div id="ideaListing">
 				Loading ideas...
 			</div>
