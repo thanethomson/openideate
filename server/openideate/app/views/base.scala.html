@@ -1,6 +1,6 @@
 @(title: String, page: String, request: play.mvc.Http.Request, user: models.User, header: Html = Html(""), footer: Html = Html(""))(content: Html)
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-ng-app="openIdeateApp">
     <head>
 	    <meta charset="utf-8" />
 	    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -49,6 +49,8 @@
 	    
 	    <script src='@routes.WebJarAssets.at(WebJarAssets.locate("jquery.min.js"))'></script>
 	    <script src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.js"))'></script>
+	    <script src='@routes.WebJarAssets.at(WebJarAssets.locate("jquery-dateFormat.min.js"))'></script>
+		<script src='@routes.WebJarAssets.at(WebJarAssets.locate("markdown-it.min.js"))'></script>
         @footer
     </body>
 </html>

@@ -19,7 +19,10 @@ libraryDependencies ++= Seq(
   "org.webjars.bower" % "font-awesome" % "4.4.0",
   "org.webjars.bower" % "bootstrap-social" % "4.10.1",
   "org.webjars.bower" % "jquery-dateFormat" % "1.0.2",
-  "org.webjars.bower" % "markdown-it" % "4.2.1"
+  "org.webjars.bower" % "markdown-it" % "4.2.1",
+  "org.webjars.bower" % "angularjs" % "1.4.7",
+  "org.webjars.bower" % "angular-resource" % "1.4.7",
+  "org.webjars.bower" % "angular-route" % "1.4.7"
 )
 
 resolvers += Resolver.sonatypeRepo("snapshots")

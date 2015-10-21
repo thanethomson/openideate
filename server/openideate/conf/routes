@@ -17,6 +17,7 @@ GET     /api/user/:id               @controllers.api.UserController.getUserById(
 
 # Ideas API
 GET     /api/idea                   @controllers.api.IdeaController.listIdeas(q: String ?= "", pageNo: Int ?= 0, pageSize: Int ?= 50, order: String ?= "whenUpdated", dir: String ?= "desc", tags: String ?= "", creatorId: Long ?= -1, starredById: Long ?= -1)
+GET     /api/idea/:id               @controllers.api.IdeaController.getIdea(id: Long)
 POST    /api/idea                   @controllers.api.IdeaController.create()
 DELETE  /api/idea/:id               @controllers.api.IdeaController.delete(id: Long)
 POST    /api/idea/star/:id          @controllers.api.IdeaController.toggleStar(id: Long)

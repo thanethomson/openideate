@@ -1,6 +1,6 @@
 @(request: play.mvc.Http.Request, user: models.User, tag: String)
 @footer = {
-	@commonScript(request, user)
+	@partials.commonScript(request, user)
 	<script>
 		$(document).ready(function() {
 			loadIdeasByTag('@tag');
@@ -21,6 +21,6 @@
 			</div>
 		</div>
 		<div class="col-md-1">&nbsp;</div>
-		@newIdeaBlock()
+		@partials.newIdeaBlock()
 	</div>
 }

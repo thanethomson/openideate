@@ -45,3 +45,7 @@ body {
 	font-weight: bold;
 	color: #888;
 }
+
+.invisible {
+	visibility: hidden;
+}

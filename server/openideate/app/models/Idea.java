@@ -219,7 +219,7 @@ public class Idea extends Model {
     }
     obj.put("stars", getStarredCount());
     obj.put("upVotes", getUpvoteCount());
-    obj.put("downVotes", 0);
+    obj.put("downVotes", getDownvoteCount());
     
     return obj;
   }
@@ -231,6 +231,8 @@ public class Idea extends Model {
     obj.put("starred", (getIdeaStar(user) != null));
     // has this idea been upvoted by this user?
     obj.put("upvoted", (getIdeaUpvote(user) != null));
+    // has this idea been downvoted by this user?
+    obj.put("downvoted", (getIdeaDownvote(user) != null));
     
     return obj;
   }
@@ -390,6 +392,16 @@ public class Idea extends Model {
    */
   public long getUpvoteCount() {
     return IdeaUpvote.find.where()
+        .eq("idea.id", getId())
+        .findRowCount();
+  }
+  
+  /**
+   * Attempts to retrieve the number of "downvotes" of this idea.
+   * @return
+   */
+  public long getDownvoteCount() {
+    return IdeaDownvote.find.where()
         .eq("idea.id", getId())
         .findRowCount();
   }

@@ -7,6 +7,10 @@
 	var md = window.markdownit();
 	var ideasByTag = null;
 	var curPage = 0, ideasPerPage = 25;
+	
+	function ajaxError(xhr, status, err) {
+		window.alert('An error occurred while attempting to communicate with the server: '+status);
+	}
 
 	function loadAllIdeas() {
 		$.ajax({
@@ -17,7 +21,7 @@
 		}).done(function(data) {
 			console.log("Received idea listing: "+JSON.stringify(data));
 			populateIdeaListing('#ideaListing', data);
-		});
+		}).fail(ajaxError);
 		
 		reloadIdeas = loadAllIdeas;
 	}
@@ -31,7 +35,7 @@
 		}).done(function(data) {
 			console.log("Received my ideas listing: "+JSON.stringify(data));
 			populateIdeaListing('#ideaListing', data);
-		});
+		}).fail(ajaxError);
 		
 		reloadIdeas = loadMyIdeas;
 	}
@@ -45,7 +49,7 @@
 		}).done(function(data) {
 			console.log("Received my ideas listing: "+JSON.stringify(data));
 			populateIdeaListing('#ideaListing', data);
-		});
+		}).fail(ajaxError);
 		
 		reloadIdeas = loadMyStarredIdeas;
 	}
@@ -63,10 +67,22 @@
 		}).done(function(data) {
 			console.log("Received my ideas listing: "+JSON.stringify(data));
 			populateIdeaListing('#ideaListing', data);
-		});
+		}).fail(ajaxError);
 		
 		reloadIdeas = loadIdeasByTag;
 		ideasByTag = tag;
+	}
+	
+	function getIdea(id, callback) {
+		$.ajax({
+			url: '@controllers.api.routes.IdeaController.getIdea(-1)'.replace('-1', id),
+			accepts: 'application/json',
+			dataType: 'json',
+			method: 'GET'
+		}).done(function(data) {
+			console.log("Received idea details: "+JSON.stringify(data));
+			callback(data);
+		}).fail(ajaxError);
 	}
 	
 	function ideaToggleStarred(ctrl, ideaId) {
@@ -80,20 +96,104 @@
 			}).done(function(data) {
 				console.log('Received data after toggling idea starred status: '+JSON.stringify(data));
 				// if we've successfully starred the idea
-				if (data.id) {
-					$(ctrl+' #idea'+ideaId).attr("starred", "true");
-					$(ctrl+' #idea'+ideaId+' .idea-body p.buttons .star').addClass('btn-warning');
-				} else {
-					$(ctrl+' #idea'+ideaId).attr("starred", "false");
-					$(ctrl+' #idea'+ideaId+' .idea-body p.buttons .star').removeClass('btn-warning');
-				}
-			});
+				updateIdea(ctrl, data);
+			}).fail(ajaxError);
 		}
 	}
 	
 	function ideaToggleUpvote(ctrl, ideaId) {
 		if ($(ctrl+' #idea'+ideaId).length) {
 			// fire off the ajax request to toggle the upvoting of the idea
+			$.ajax({
+				url: '@controllers.api.routes.IdeaController.toggleUpvote(-1)'.replace('-1', ideaId),
+				accepts: 'application/json',
+				dataType: 'json',
+				method: 'POST'
+			}).done(function(data) {
+				console.log('Received data after toggling idea upvote status: '+JSON.stringify(data));
+				// if we've successfully upvoted the idea
+				updateIdea(ctrl, data);
+			}).fail(ajaxError);
+		}
+	}
+	
+	function ideaToggleDownvote(ctrl, ideaId) {
+		if ($(ctrl+' #idea'+ideaId).length) {
+			// fire off the ajax request to toggle the downvoting of the idea
+			$.ajax({
+				url: '@controllers.api.routes.IdeaController.toggleDownvote(-1)'.replace('-1', ideaId),
+				accepts: 'application/json',
+				dataType: 'json',
+				method: 'POST'
+			}).done(function(data) {
+				console.log('Received data after toggling idea downvote status: '+JSON.stringify(data));
+				updateIdea(ctrl, data);
+			}).fail(ajaxError);
+		}
+	}
+	
+	/**
+	 * Updates the UI for the specified idea.
+	 */
+	function updateIdea(ctrl, idea) {
+		console.log('Attempting to update UI for idea with ID: '+idea.id);
+		
+		// update the various counts
+		$(ctrl+' #idea'+idea.id+' .upvote-count').text(idea.upVotes);
+		$(ctrl+' #idea'+idea.id+' .downvote-count').text(idea.downVotes);
+		$(ctrl+' #idea'+idea.id+' .star-count').text(idea.stars);
+		
+		// update the buttons' status
+		if (idea.upvoted) {
+			$(ctrl+' #idea'+idea.id).attr("upvoted", "true");
+			$(ctrl+' #idea'+idea.id+' .idea-body p.buttons .upvote').addClass('btn-success');
+			// make sure it's not downvoted
+			$(ctrl+' #idea'+idea.id).attr("downvoted", "false");
+			$(ctrl+' #idea'+idea.id+' .idea-body p.buttons .downvote').removeClass('btn-danger');
+		} else if (idea.downvoted) {
+			$(ctrl+' #idea'+idea.id).attr("downvoted", "true");
+			$(ctrl+' #idea'+idea.id+' .idea-body p.buttons .downvote').addClass('btn-danger');
+			// make sure it's not upvoted
+			$(ctrl+' #idea'+idea.id).attr("upvoted", "false");
+			$(ctrl+' #idea'+idea.id+' .idea-body p.buttons .upvote').removeClass('btn-success');
+		} else {
+			$(ctrl+' #idea'+idea.id).attr("upvoted", "false");
+			$(ctrl+' #idea'+idea.id+' .idea-body p.buttons .upvote').removeClass('btn-success');
+			$(ctrl+' #idea'+idea.id).attr("downvoted", "false");
+			$(ctrl+' #idea'+idea.id+' .idea-body p.buttons .downvote').removeClass('btn-danger');
+		}
+		
+		if (idea.starred) {
+			$(ctrl+' #idea'+idea.id).attr("starred", "true");
+			$(ctrl+' #idea'+idea.id+' .idea-body p.buttons .star').addClass('btn-warning');
+		} else {
+			$(ctrl+' #idea'+idea.id).attr("starred", "false");
+			$(ctrl+' #idea'+idea.id+' .idea-body p.buttons .star').removeClass('btn-warning');
+		}
+		
+		// update the idea's content
+		$(ctrl+' #idea'+idea.id+' h4 .text').text(idea.title);
+		var updated = Date.parse(idea.updated);
+		$(ctrl+' #idea'+idea.id+' .idea-body .author .updated').text($.format.date(updated, "d MMM yyyy HH:mm"));
+		$(ctrl+' #idea'+idea.id+' .details').html(md.render(idea.details));
+	}
+	
+	function deleteIdea(ctrl, id) {
+		if (window.confirm("Are you sure you want to delete this idea?")) {
+			// fire off the ajax request to delete the idea
+			console.log('Attempting to delete idea with ID: '+id);
+			$.ajax({
+				url: '@controllers.api.routes.IdeaController.delete(-1)'.replace('-1', id),
+				accepts: 'application/json',
+				dataType: 'json',
+				method: 'DELETE'
+			}).done(function(data) {
+				console.log('Successfully deleted idea with ID: '+id);
+				// remove the idea from the listing, if it's there
+				if ($(ctrl+' #idea'+id).length) {
+					$(ctrl+' #idea'+id).remove();
+				}
+			}).fail(ajaxError);
 		}
 	}
 	
@@ -109,7 +209,7 @@
 		}
 		// otherwise we're just loading more ideas
 		
-		var idea, created;
+		var idea, updated;
 		
 		for (var i=0;i<data.ideas.length;i++) {
 			idea = data.ideas[i];
@@ -125,22 +225,22 @@
 						'Avatar'+
 					'</div>'+
 					'<div class="col-md-10 idea-body">'+
-						'<h4></h4>'+
-						'<p class="author">By <a class="name" href="#"></a>, <span class="created"></span></p>'+
+						'<h4><span class="text"></span></h4>'+
+						'<p class="author">By <a class="name" href="#"></a>, <span class="updated"></span></p>'+
 						'<p class="details"></p>'+
 						'<p class="tags"></p>'+
 						'<p class="comment-box"></p>'+
 						'<p class="comments"></p>'+
 					'</div>'+
 				'</div>');
-			$(ctrl+' #idea'+idea.id+' h4').text(idea.title);
-			$(ctrl+' #idea'+idea.id+' h4').append('&nbsp;<span class="badge"><span class="glyphicon glyphicon-thumbs-up">'+idea.upVotes+'</span></span>');
-			$(ctrl+' #idea'+idea.id+' h4').append('&nbsp;<span class="badge"><span class="glyphicon glyphicon-thumbs-down">'+idea.downVotes+'</span></span>');
-			$(ctrl+' #idea'+idea.id+' h4').append('&nbsp;<span class="badge"><span class="glyphicon glyphicon-star">'+idea.stars+'</span></span>');
+			$(ctrl+' #idea'+idea.id+' h4 .text').text(idea.title);
+			$(ctrl+' #idea'+idea.id+' h4').append('&nbsp;<span class="badge"><span class="glyphicon glyphicon-thumbs-up upvote-count">'+idea.upVotes+'</span></span>');
+			$(ctrl+' #idea'+idea.id+' h4').append('&nbsp;<span class="badge"><span class="glyphicon glyphicon-thumbs-down downvote-count">'+idea.downVotes+'</span></span>');
+			$(ctrl+' #idea'+idea.id+' h4').append('&nbsp;<span class="badge"><span class="glyphicon glyphicon-star star-count">'+idea.stars+'</span></span>');
 			
-			created = Date.parse(idea.created);
-			console.log('Idea created: '+created);
-			$(ctrl+' #idea'+idea.id+' .idea-body .author .created').text($.format.date(created, "d MMM yyyy HH:mm"));
+			updated = Date.parse(idea.updated);
+			console.log('Idea update: '+updated);
+			$(ctrl+' #idea'+idea.id+' .idea-body .author .updated').text($.format.date(updated, "d MMM yyyy HH:mm"));
 			// render the Markdown version of the idea details
 			$(ctrl+' #idea'+idea.id+' p.details').html(md.render(idea.details));
 			$.each(idea.tags, function(index, tag) {
@@ -174,6 +274,26 @@
 				$(ctrl+' #idea'+idea.id+' .idea-body p.buttons .star').addClass("btn-warning");
 			}
 			
+			$(ctrl+' #idea'+idea.id+' .idea-body p.buttons .upvote').click(function() {
+				ideaToggleUpvote(ctrl, idea.id);
+			});
+			
+			// check if the idea was upvoted by this user
+			if (idea.upvoted) {
+				$(ctrl+' #idea'+idea.id+' .idea-body p.buttons .upvote').attr('upvoted', "true");
+				$(ctrl+' #idea'+idea.id+' .idea-body p.buttons .upvote').addClass("btn-success");
+			}
+			
+			$(ctrl+' #idea'+idea.id+' .idea-body p.buttons .downvote').click(function() {
+				ideaToggleDownvote(ctrl, idea.id);
+			});
+			
+			// check if the idea was downvoted by this user
+			if (idea.downvoted) {
+				$(ctrl+' #idea'+idea.id+' .idea-body p.buttons .downvote').attr('downvoted', "true");
+				$(ctrl+' #idea'+idea.id+' .idea-body p.buttons .downvote').addClass("btn-danger");
+			}
+			
 			// get the user's details
 			getUserById(idea.creatorId, idea, function(user, idea) {
 				$(ctrl+' #idea'+idea.id+' .idea-body .author .name').text(user.name);
@@ -185,10 +305,13 @@
 				// if this is our currently logged in user
 				if (user.id == @user.getId()) {
 					$(ctrl+' #idea'+idea.id+' .idea-body p.buttons').prepend(
-							'<button type="button" class="btn btn-sm btn-danger" arial-label="Delete" title="Delete">'+
+							'<button type="button" class="btn btn-sm btn-danger delete" arial-label="Delete" title="Delete">'+
 								'<span class="glyphicon glyphicon-remove"></span>'+
 							'</button>&nbsp;'
 							);
+					$(ctrl+' #idea'+idea.id+' .idea-body p.buttons .delete').click(function() {
+						deleteIdea(ctrl, idea.id);
+					});
 				}
 			});
 		}
@@ -224,7 +347,7 @@
 				// cache the user object
 				usersById[id] = data;
 				callback(data, ideaId);
-			});
+			}).fail(ajaxError);
 		}
 	}
 	
@@ -255,8 +378,10 @@
 				$('#titleInput').val('');
 				$('#detailsInput').val('');
 				$('#tagsInput').val('');
+				// reset the page counter
+				curPage = 0;
 				reloadIdeas();
-			});
+			}).fail(ajaxError);
 		}
 	}
 </script>

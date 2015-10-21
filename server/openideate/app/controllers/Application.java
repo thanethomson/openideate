@@ -17,7 +17,7 @@ public class Application extends Controller {
   
   @SubjectPresent(handlerKey="frontend")
   public Result index() {
-    return ok(views.html.index.render(request(), (User)ctx().args.get("user")));
+    return ok(views.html.index.render("Home", "home", request(), (User)ctx().args.get("user"), null));
   }
   
   public Result login() {
@@ -41,18 +41,18 @@ public class Application extends Controller {
   
   @SubjectPresent(handlerKey="frontend")
   public Result myIdeas() {
-    return ok(views.html.myIdeas.render(request(), (User)ctx().args.get("user")));
+    return ok(views.html.index.render("- My Ideas", "mine", request(), (User)ctx().args.get("user"), null));
   }
   
   
   @SubjectPresent(handlerKey="frontend")
   public Result myStarredIdeas() {
-    return ok(views.html.myStarredIdeas.render(request(), (User)ctx().args.get("user")));
+    return ok(views.html.index.render("- Starred Ideas", "starred", request(), (User)ctx().args.get("user"), null));
   }
   
   @SubjectPresent(handlerKey="frontend")
   public Result listIdeasByTag(String tag) {
-    return ok(views.html.ideasByTag.render(request(), (User)ctx().args.get("user"), tag));
+    return ok(views.html.index.render("- Tagged Ideas", "tagged", request(), (User)ctx().args.get("user"), tag));
   }
 
 }

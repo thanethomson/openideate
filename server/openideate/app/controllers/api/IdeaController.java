@@ -1,6 +1,7 @@
 package controllers.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,10 +15,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import be.objectify.deadbolt.java.actions.SubjectPresent;
 import models.Idea;
-import models.IdeaDownvote;
-import models.IdeaStar;
 import models.IdeaTag;
-import models.IdeaUpvote;
 import models.User;
 import play.Logger;
 import play.libs.Json;
@@ -73,18 +71,25 @@ public class IdeaController extends Controller {
     String tagString;
     List<IdeaTag> tags = new ArrayList<>();
     
-    if (body.hasNonNull("tags")) {
+    if (body.hasNonNull("tags")) {      
+      List<String> rawTags;
+      
       if (!body.get("tags").isArray()) {
-        return badRequest(new JsonError("Invalid format for tags").toJson());
+        rawTags = Arrays.asList(body.get("tags").asText().split(","));
+      } else {
+        rawTags = new ArrayList<>();
+        
+        for (JsonNode el: body.get("tags")) {
+          if (!el.isTextual()) {
+            return badRequest(new JsonError("Each tag must be a string").toJson());
+          }
+          rawTags.add(el.asText());
+        }
       }
       
       // now run through the tags and check them
-      for (JsonNode el: body.get("tags")) {
-        if (!el.isTextual()) {
-          return badRequest(new JsonError("Each tag must be a string").toJson());
-        }
-        
-        tagString = TagUtils.toTag(el.asText());
+      for (String rawTag: rawTags) {
+        tagString = TagUtils.toTag(rawTag);
         if (!TagUtils.isValidTag(tagString)) {
           return badRequest(new JsonError("Invalid tag name").toJson());
         }
@@ -235,6 +240,13 @@ public class IdeaController extends Controller {
       return notFound(new JsonError("Cannot find the idea with the given ID").toJson());
     }
     
+    // first unlink the idea from any other models
+    idea.setCreator(null);
+    idea.setForkedFrom(null);
+    idea.setStarrings(new ArrayList<>());
+    idea.setTags(new ArrayList<>());
+    idea.save();
+    
     // delete the idea
     idea.delete();
     return ok(new JsonMessage("Deleted").toJson());
@@ -255,13 +267,11 @@ public class IdeaController extends Controller {
       return notFound(new JsonError("Cannot find the idea with the given ID").toJson());
     }
     
-    IdeaStar star = idea.toggleStar((User)ctx().args.get("user"));
+    idea.toggleStar((User)ctx().args.get("user"));
     
-    if (star == null) {
-      return ok(new JsonMessage("Idea unstarred").toJson());
-    } else {
-      return ok(star.toJson());
-    }
+    // return the full idea's details
+    idea.refresh();
+    return ok(idea.toJson((User)ctx().args.get("user")));
   }
   
   @SubjectPresent
@@ -273,13 +283,11 @@ public class IdeaController extends Controller {
       return notFound(new JsonError("Cannot find the idea with the given ID").toJson());
     }
     
-    IdeaUpvote upvote = idea.toggleUpvote((User)ctx().args.get("user"));
+    idea.toggleUpvote((User)ctx().args.get("user"));
     
-    if (upvote == null) {
-      return ok(new JsonMessage("Upvote removed").toJson());
-    } else {
-      return ok(upvote.toJson());
-    }
+    // return the full idea's details
+    idea.refresh();
+    return ok(idea.toJson((User)ctx().args.get("user")));
   }
   
   
@@ -292,13 +300,24 @@ public class IdeaController extends Controller {
       return notFound(new JsonError("Cannot find the idea with the given ID").toJson());
     }
     
-    IdeaDownvote downvote = idea.toggleDownvote((User)ctx().args.get("user"));
+    idea.toggleDownvote((User)ctx().args.get("user"));
     
-    if (downvote == null) {
-      return ok(new JsonMessage("Downvote removed").toJson());
-    } else {
-      return ok(downvote.toJson());
+    // return the full idea's details
+    idea.refresh();
+    return ok(idea.toJson((User)ctx().args.get("user")));
+  }
+  
+  
+  @SubjectPresent
+  public Result getIdea(Long id) {
+    logger.debug(String.format("Attempting to retrieve details of idea with ID: %d", id));
+    
+    Idea idea = Idea.find.byId(id);
+    if (idea == null) {
+      return notFound(new JsonError("Cannot find the idea with the given ID").toJson());
     }
+    
+    return ok(idea.toJson((User)ctx().args.get("user")));
   }
 
 }
