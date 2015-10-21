@@ -1,0 +1,33 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+GET     /                           @controllers.Application.index()
+GET     /mine                       @controllers.Application.myIdeas()
+GET     /starred                    @controllers.Application.myStarredIdeas()
+GET     /tagged/:tag                @controllers.Application.listIdeasByTag(tag: String)
+
+# OAuth
+GET     /login                      @controllers.Application.login()
+GET     /logout                     @controllers.Application.logout()
+GET     /authenticate/:provider     @controllers.Application.authenticate(provider: String)
+
+# Users API
+GET     /api/user/:id               @controllers.api.UserController.getUserById(id: Long)
+
+# Ideas API
+GET     /api/idea                   @controllers.api.IdeaController.listIdeas(q: String ?= "", pageNo: Int ?= 0, pageSize: Int ?= 50, order: String ?= "whenUpdated", dir: String ?= "desc", tags: String ?= "", creatorId: Long ?= -1, starredById: Long ?= -1)
+GET     /api/idea/:id               @controllers.api.IdeaController.getIdea(id: Long)
+POST    /api/idea                   @controllers.api.IdeaController.create()
+DELETE  /api/idea/:id               @controllers.api.IdeaController.delete(id: Long)
+POST    /api/idea/star/:id          @controllers.api.IdeaController.toggleStar(id: Long)
+POST    /api/idea/upvote/:id        @controllers.api.IdeaController.toggleUpvote(id: Long)
+POST    /api/idea/downvote/:id      @controllers.api.IdeaController.toggleDownvote(id: Long)
+
+GET     /api/idea/tag               @controllers.api.IdeaController.listTags()
+POST    /api/idea/tag               @controllers.api.IdeaController.createTag()
+
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+GET     /webjars/*file              controllers.WebJarAssets.at(file)

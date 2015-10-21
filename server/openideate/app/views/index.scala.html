@@ -1,0 +1,333 @@
+@(title: String, page: String, request: play.mvc.Http.Request, user: models.User, tag: String = null)
+<!DOCTYPE html>
+<html lang="en" data-ng-app="openIdeateApp">
+    <head>
+	    <meta charset="utf-8" />
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	    <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>OpenIdeate @title</title>
+        <!-- Bootstrap core CSS -->
+    	<link href='@routes.WebJarAssets.at(WebJarAssets.locate("css/bootstrap.min.css"))' rel="stylesheet" media="all" />
+    	<link href='@routes.Assets.versioned("stylesheets/main.css")' rel="stylesheet" media="all" />
+    	<link href='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-social.css"))' rel="stylesheet" media="all" />
+    	<link href='@routes.WebJarAssets.at(WebJarAssets.locate("font-awesome.min.css"))' rel="stylesheet" media="all" />
+    	<script src='@routes.Assets.versioned("lib/angularjs/angular.js")'></script>
+    	<script src='@routes.Assets.versioned("lib/angular-resource/angular-resource.js")'></script>
+    	<script src='@routes.WebJarAssets.at(WebJarAssets.locate("markdown-it.min.js"))'></script>
+    	<script src='@routes.WebJarAssets.at(WebJarAssets.locate("jquery.min.js"))'></script>
+	    <script src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.js"))'></script>
+	    <script src='@routes.WebJarAssets.at(WebJarAssets.locate("jquery-dateFormat.min.js"))'></script>
+    	<script>
+    		// our Markdown renderer
+    		var md = window.markdownit();
+    		
+			angular.module('ideaFactory', ['ngResource']).factory('IdeaFactory', function($resource) {
+	        	return $resource('@controllers.api.routes.IdeaController.listIdeas()?pageNo=:pageNo&pageSize=:pageSize&q=:query&tags=:tags&creatorId=:creatorId&starredById=:starredById', {}, {
+	        		query: {
+	        			isArray: false,
+	        			cache: false
+	        		},
+	        		save: {
+	        			isArray: false,
+	        			cache: false,
+	        			url: '@controllers.api.routes.IdeaController.create()',
+	        			method: 'POST'
+	        		}
+	        	});
+	        });
+			
+			angular.module('userFactory', ['ngResource']).factory('UserFactory', function($resource) {
+				return $resource('@controllers.api.routes.UserController.getUserById(-1)'.replace('-1', ':userId'), {}, {
+					query: {
+						isArray: false,
+						cache: true
+					}
+				});
+			});
+			
+			var openIdeateApp = angular.module('openIdeateApp',
+					['ngResource', 'ideaFactory', 'userFactory']);
+			
+			function IdeaControllerFactory(_sectionTitle, _defaultPageSize, _pageNo, _pageSize,
+					_query, _tags, _creatorId, _starredById) {
+				console.log('Creating IdeaController with params: sectionTitle='+_sectionTitle+', query='+_query+', creatorId='+_creatorId);
+				var fn = function($scope, IdeaFactory, UserFactory, $timeout, $sce, $http) {
+		        	$scope.sectionTitle = _sectionTitle;
+		        	$scope.defaultPageSize = _defaultPageSize;
+		        	$scope.pageNo = _pageNo;
+		        	$scope.pageSize = $scope.defaultPageSize;
+		        	$scope.query = _query;
+		        	$scope.tags = _tags;
+		        	$scope.creatorId = _creatorId;
+		        	$scope.starredById = _starredById;
+		        	$scope.ideas = [];
+		        	$scope.total = $scope.ideas.length;
+		        	$scope.newIdea = {};
+		        	$scope.trustAsHtml = function(code) {
+		        		return $sce.trustAsHtml(code);
+		        	};
+		        	$scope.asMarkdown = function(markdown) {
+		        		return md.render(markdown);
+		        	};
+		        	$scope.formatIsoDate = function(isoDate) {
+		        		return $.format.date(new Date(isoDate), "d MMM yyyy HH:mm");
+		        	};
+		        	$scope.getUser = function(id) {
+		        		console.log('Attempting to fetch user with ID: '+id);
+		        		return UserFactory.query({userId: id});
+		        	};
+		        	$scope.listIdeas = function() {
+		        		IdeaFactory.query({
+		        			pageNo: $scope.pageNo ? $scope.pageNo : 0,
+		        			pageSize: $scope.pageSize ? $scope.pageSize : 50,
+		        			query: $scope.query ? $scope.query : "",
+		        			tags: $scope.tags ? $scope.tags : "",
+		        			creatorId: $scope.creatorId ? $scope.creatorId : -1,
+		        			starredById: $scope.starredById ? $scope.starredById : -1
+		        		}, function(data) {
+		        			console.log('Received idea listing JSON data: '+JSON.stringify(data));
+		        			// next page
+		        			$scope.pageNo = data.pageNo+1;
+		        			$scope.pageSize = data.pageSize;
+		        			$scope.total = data.total;
+		        			var idea;
+		        			for (var i=0;i<data.ideas.length;i++) {
+		        				idea = data.ideas[i];
+		        				// fire off our request to look up the user's details
+		        				idea.creator = $scope.getUser(idea.creatorId);
+		        				$scope.ideas.push(idea);
+		        			}
+		        		});
+		        	};
+		        	
+		        	$scope.loadMore = function() {
+		        		console.log('Firing off query to server for more ideas...');
+		        		$scope.listIdeas();
+		        	};
+		        	
+		        	$scope.reload = function() {
+		        		console.log('Initiating idea reload...');
+		        		$scope.pageNo = _pageNo;
+		        		$scope.ideas = [];
+		        		$scope.listIdeas();
+		        	};
+		        	
+		        	$scope.loadAllIdeas = function() {
+		        		console.log('Attempting to load all ideas...');
+		        		$scope.sectionTitle = _sectionTitle;
+		        		$scope.pageNo = _pageNo;
+		        		$scope.pageSize = $scope.defaultPageSize;
+			        	$scope.query = _query;
+			        	$scope.tags = _tags;
+			        	$scope.creatorId = _creatorId;
+			        	$scope.starredById = _starredById;
+			        	$scope.ideas = [];
+			        	$scope.listIdeas();
+		        	};
+		        	
+		        	$scope.updateIdea = function(idea) {
+		        		for (var i=0;i<$scope.ideas.length;i++) {
+		        			if ($scope.ideas[i].id == idea.id) {
+		        				$scope.ideas[i] = idea;
+		        				$scope.ideas[i].creator = $scope.getUser(idea.creatorId);
+		        				// no use in going on
+		        				break;
+		        			}
+		        		}
+		        	};
+		        	
+		        	$scope.upvote = function(ideaId) {
+		        		console.log('Attempting to upvote idea with ID: '+ideaId);
+		        		$http.post('@controllers.api.routes.IdeaController.toggleUpvote(-1)'.replace('-1', ideaId), {}).then(
+		        				function(response) {
+		        					console.log('Got idea back from upvote: '+JSON.stringify(response.data));
+		        					$scope.updateIdea(response.data);
+		        				}, function(response) {
+		        					console.log('Error: '+response.data);
+		        				});
+		        	};
+		        	
+		        	$scope.downvote = function(ideaId) {
+		        		console.log('Attempting to downvote idea with ID: '+ideaId);
+		        		$http.post('@controllers.api.routes.IdeaController.toggleDownvote(-1)'.replace('-1', ideaId), {}).then(
+		        				function(response) {
+		        					console.log('Got idea back from downvote: '+JSON.stringify(response.data));
+		        					$scope.updateIdea(response.data);
+		        				}, function(response) {
+		        					console.log('Error: '+response.data);
+		        				});
+		        	};
+		        	
+		        	$scope.star = function(ideaId) {
+		        		console.log('Attempting to toggle star for idea with ID: '+ideaId);
+		        		$http.post('@controllers.api.routes.IdeaController.toggleStar(-1)'.replace('-1', ideaId), {}).then(
+		        				function(response) {
+		        					console.log('Got idea back from star op: '+JSON.stringify(response.data));
+		        					$scope.updateIdea(response.data);
+		        				}, function(response) {
+		        					console.log('Error: '+response.data);
+		        				});
+		        	};
+		        	
+		        	$scope.upvoteClass = function(idea) {
+		        		return (idea.upvoted) ? 'btn-success' : '';
+		        	};
+		        	
+		        	$scope.downvoteClass = function(idea) {
+		        		return (idea.downvoted) ? 'btn-danger' : '';
+		        	}
+		        	
+		        	$scope.starClass = function(idea) {
+		        		return (idea.starred) ? 'btn-warning' : '';
+		        	}
+		        	
+		        	$scope.moreIdeas = function() {
+		        		return (($scope.pageNo * $scope.pageSize) < $scope.total);
+		        	};
+		        	
+		        	$scope.moreButtonClass = function() {
+		        		return $scope.moreIdeas() ? '' : 'invisible';
+		        	};
+		        	
+		        	$scope.createIdea = function(idea) {
+		        		console.log('Attempting to create idea: '+JSON.stringify(idea));
+		        		IdeaFactory.save(idea, function(data) {
+		        			console.log('Received response after idea creation attempt: '+JSON.stringify(data));
+		        			$scope.reload();
+		        			// clear the form
+		        			$scope.newIdea = {};
+		        		});
+		        	};
+		        	
+		        	// load our initial cohort of ideas
+		        	$timeout(function() {
+		        		$scope.loadAllIdeas();
+		        	});
+		        }
+		        fn.$inject = ['$scope', 'IdeaFactory', 'UserFactory', '$timeout', '$sce', '$http'];
+		        return fn;
+			}
+			
+	        // add the controller
+	        @if(page=="home") {
+	        	openIdeateApp.controller('IdeaController', IdeaControllerFactory("All Ideas"));
+	        } else {
+	        	@if(page=="mine") {
+	        		openIdeateApp.controller('IdeaController', IdeaControllerFactory("My Ideas", null, null, null, null, null, @user.getId()));
+	        	} else {
+	        		@if(page=="starred") {
+	        			openIdeateApp.controller('IdeaController', IdeaControllerFactory("Starred Ideas", null, null, null, null, null, null, @user.getId()));
+	        		} else {
+	        			@if(page=="tagged") {
+	        				openIdeateApp.controller('IdeaController', IdeaControllerFactory("Tagged Ideas: @tag", null, null, null, null, '@tag'));
+	        			}
+	        		}
+	        	}
+	        }
+        </script>
+    </head>
+    <body>
+    	<nav class="navbar navbar-inverse navbar-fixed-top">
+	      <div class="container">
+	        <div class="navbar-header">
+	          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+	            <span class="sr-only">Toggle navigation</span>
+	            <span class="icon-bar"></span>
+	            <span class="icon-bar"></span>
+	            <span class="icon-bar"></span>
+	          </button>
+	          <a class="navbar-brand" href="@controllers.routes.Application.index()">OpenIdeate</a>
+	        </div>
+	        <div id="navbar" class="collapse navbar-collapse">
+	          @if(user != null) {
+	          	  <ul class="nav navbar-nav">
+		            <li@if(page=="home"){ class="active"}><a href="@controllers.routes.Application.index()">All</a></li>
+		            <li@if(page=="mine"){ class="active"}><a href="@controllers.routes.Application.myIdeas()">Mine</a></li>
+		            <li@if(page=="starred"){ class="active"}><a href="@controllers.routes.Application.myStarredIdeas()">Starred</a></li>
+		          </ul>
+		          <ul class="nav navbar-nav navbar-right">
+		          	<li><a href="@controllers.routes.Application.logout()">Logout</a></li>
+		          </ul>
+		          <p class="navbar-text navbar-right">
+		          	Welcome @user.getName!
+		          </p>
+		      }
+	        </div><!--/.nav-collapse -->
+	      </div>
+	    </nav>
+	
+	    <div class="container" data-ng-controller="IdeaController">
+	    	<div class="row">
+				<div class="col-md-7 bg">
+					<h3>{{sectionTitle}}</h3>
+					<div id="ideaListing">
+						<div class="row idea" data-ng-repeat="idea in ideas" data-idea-id="{{idea.id}}">
+							<div class="col-md-2 idea-avatar-small">
+								<img data-ng-src="{{idea.creator.pictureUrl}}" />
+							</div>
+							<div class="col-md-10 idea-body">
+								<h4>
+									{{idea.title}}
+									&nbsp;<span class="badge"><span class="glyphicon glyphicon-thumbs-up">{{idea.upVotes}}</span></span>
+									&nbsp;<span class="badge"><span class="glyphicon glyphicon-thumbs-down">{{idea.downVotes}}</span></span>
+									&nbsp;<span class="badge"><span class="glyphicon glyphicon-star">{{idea.stars}}</span></span>
+								</h4>
+								<p class="author">
+									By {{idea.creator.name}}, {{formatIsoDate(idea.updated)}}
+								</p>
+								<p class="details" data-ng-bind-html="trustAsHtml(asMarkdown(idea.details))"></p>
+								<p class="tags">
+									<a href='@{controllers.routes.Application.listIdeasByTag("")}{{tag}}' data-ng-repeat="tag in idea.tags">
+										<span class="label label-primary">{{tag}}</span>
+									</a>
+								</p>
+								<p class="buttons">
+									<button type="button" class="btn btn-sm upvote {{upvoteClass(idea)}}" arial-label="Upvote" title="Upvote" data-ng-click="upvote(idea.id)">
+										<span class="glyphicon glyphicon-thumbs-up"></span>
+									</button>
+									<button type="button" class="btn btn-sm downvote {{downvoteClass(idea)}}" arial-label="Downvote" title="Downvote" data-ng-click="downvote(idea.id)">
+										<span class="glyphicon glyphicon-thumbs-down"></span>
+									</button>
+									<button type="button" class="btn btn-sm star {{starClass(idea)}}" arial-label="Star" title="Star" data-ng-click="star(idea.id)">
+										<span class="glyphicon glyphicon-star"></span>
+									</button>
+								</p>
+							</div>
+						</div>
+						<button type="button" class="btn btn-lg btn-block btn-primary {{moreButtonClass()}}" data-ng-click="loadMore()">
+							More
+						</button>
+					</div>
+				</div>
+				<div class="col-md-1">&nbsp;</div>
+				<div class="col-md-4 bg">
+					<h3>New Idea</h3>
+					<form>
+						<div class="form-group">
+							<label for="titleInput">Title</label>
+							<span class="help-block">Give your idea a short, sharp, descriptive title.</span>
+							<input type="text" class="form-control" id="titleInput" data-ng-model="newIdea.title" />
+						</div>
+						
+						<div class="form-group">
+							<label for="detailsInput">Details</label>
+							<span class="help-block">This is where you enter as much detail as you can
+							regarding your idea. We support <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet">Markdown</a> formatting here.</span>
+							<textarea class="form-control" rows="5" id="detailsInput" data-ng-model="newIdea.details"></textarea>
+						</div>
+						
+						<div class="form-group">
+							<label for="tagsInput">Tags</label>
+							<span class="help-block">Enter one or more tags to help in categorising your idea (comma-separated).</span>
+							<input type="text" class="form-control" id="tagsInput" data-ng-model="newIdea.tags" />
+						</div>
+						
+						<div class="form-group">
+							<button type="button" class="btn btn-primary btn-lg btn-block" id="createIdeaBtn" data-ng-click="createIdea(newIdea)">Create!</button>
+						</div>
+					</form>
+				</div>
+			</div>
+	    </div>
+    </body>
+</html>

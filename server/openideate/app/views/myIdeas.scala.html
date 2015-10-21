@@ -1,0 +1,26 @@
+@(request: play.mvc.Http.Request, user: models.User)
+@footer = {
+	@partials.commonScript(request, user)
+	<script>
+		$(document).ready(function() {
+			loadMyIdeas();
+			$('#createIdeaBtn').click(function() {
+				newIdea();
+				return false;
+			});
+		});
+	</script>
+}
+
+@base("My Ideas", "mine", request, user, null, footer) {
+	<div class="row">
+		<div class="col-md-7 bg">
+			<h3>My Ideas</h3>
+			<div id="ideaListing">
+				Loading ideas...
+			</div>
+		</div>
+		<div class="col-md-1">&nbsp;</div>
+		@partials.newIdeaBlock()
+	</div>
+}
