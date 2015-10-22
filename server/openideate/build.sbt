@@ -21,8 +21,7 @@ libraryDependencies ++= Seq(
   "org.webjars.bower" % "jquery-dateFormat" % "1.0.2",
   "org.webjars.bower" % "markdown-it" % "4.2.1",
   "org.webjars.bower" % "angularjs" % "1.4.7",
-  "org.webjars.bower" % "angular-resource" % "1.4.7",
-  "org.webjars.bower" % "angular-route" % "1.4.7"
+  "org.webjars.bower" % "angular-resource" % "1.4.7"
 )
 
 resolvers += Resolver.sonatypeRepo("snapshots")
@@ -30,3 +29,17 @@ resolvers += Resolver.sonatypeRepo("snapshots")
 // Play provides two styles of routers, one expects its actions to be injected, the
 // other, legacy style, accesses its actions statically.
 routesGenerator := InjectedRoutesGenerator
+
+// Docker config
+import com.typesafe.sbt.packager.docker._
+
+dockerExposedPorts := Seq(9000)
+defaultLinuxInstallLocation in Docker := "/opt/openideate"
+dockerCommands := dockerCommands.value.filterNot {
+	case ExecCmd("ENTRYPOINT", args @ _*) => true
+	case ExecCmd("CMD", args @ _*) => true
+	case cmd => false
+}
+dockerCommands ++= Seq(
+	ExecCmd("CMD", "bin/openideate", "-Dconfig.file=/opt/openideate/conf/application-prod.conf")
+)

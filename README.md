@@ -4,6 +4,14 @@
 OpenIdeate is a simple application designed to allow a group of people to
 pool together their ideas, vote on those ideas, fork them and tweak them.
 
+## TODO
+The following features are still in the pipeline:
+
+* Tag cloud
+* Commenting on ideas
+* Forking of ideas (like how you'd fork a repo on GitHub)
+* Any more suggestions? :-)
+
 ## License
 Copyright (c) 2015 DStv Digital Media
 
