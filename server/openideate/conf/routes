@@ -6,6 +6,7 @@ GET     /                           @controllers.Application.index()
 GET     /mine                       @controllers.Application.myIdeas()
 GET     /starred                    @controllers.Application.myStarredIdeas()
 GET     /tagged/:tag                @controllers.Application.listIdeasByTag(tag: String)
+GET     /restricted                 @controllers.Application.restricted()
 
 # OAuth
 GET     /login                      @controllers.Application.login()
