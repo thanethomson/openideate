@@ -20,6 +20,7 @@ import models.User;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.*;
+import security.restrict.RestrictToHostGroup;
 import utils.JsonUtils;
 import utils.TagUtils;
 import views.json.JsonError;
@@ -28,6 +29,7 @@ import views.json.JsonMessage;
 /**
  * Our idea management API.
  */
+@RestrictToHostGroup
 public class IdeaController extends Controller {
   
   private static final Logger.ALogger logger = Logger.of(IdeaController.class);

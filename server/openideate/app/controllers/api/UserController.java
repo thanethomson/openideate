@@ -4,8 +4,10 @@ import be.objectify.deadbolt.java.actions.SubjectPresent;
 import models.User;
 import play.Logger;
 import play.mvc.*;
+import security.restrict.RestrictToHostGroup;
 import views.json.JsonError;
 
+@RestrictToHostGroup
 public class UserController extends Controller {
   
   private static final Logger.ALogger logger = Logger.of(UserController.class);

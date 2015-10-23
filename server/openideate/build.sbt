@@ -1,6 +1,6 @@
 name := """openideate"""
 
-version := "0.1.0-alpha"
+version := "0.1.0-alpha.3"
 
 lazy val root = (project in file(".")).enablePlugins(PlayJava, PlayEbean)
 
